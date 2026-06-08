@@ -87,7 +87,7 @@ const DocumentPreview = forwardRef(function DocumentPreview({ showStamp, recipie
             paddingBottom: '7px',
             boxSizing: 'border-box',
           }}>
-            {org.abbr || org.shortName}騎縫章
+            {org.name || org.abbr || org.shortName}騎縫章
           </div>
         </div>
       )}
