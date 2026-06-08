@@ -64,7 +64,7 @@ export default function MetaPanel() {
               type="text"
               value={meta.docNumber.number}
               onChange={e => actions.updateDocNumber({ number: e.target.value })}
-              placeholder="第 0001 號"
+              placeholder="輸入數字 (如: 0001)"
               className="flex-1 text-sm font-sans border border-border rounded-lg px-3 py-2 bg-surface text-ink
                          placeholder-ink-muted/50 focus:outline-none focus:ring-2 focus:ring-vermillion/20
                          focus:border-vermillion/50 transition-all"

@@ -149,7 +149,7 @@ const DocumentPreview = forwardRef(function DocumentPreview({ showStamp, showSea
         <div style={{fontSize: '12pt',}}>發文日期：{meta.date ? isoToROC(meta.date) : ''}</div>
 
         {meta.docNumber?.enabled && (
-          <div style={{fontSize: '12pt',}}>發文字號：{meta.docNumber.prefix}{meta.docNumber.number}</div>
+          <div style={{fontSize: '12pt',}}>發文字號：{meta.docNumber.prefix}第 {meta.docNumber.number || '　　'} 號</div>
         )}
 
         <div style={{fontSize: '12pt',}}>附件：{meta.attachment}</div>
