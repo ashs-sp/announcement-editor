@@ -40,7 +40,7 @@
     "name": "國立高雄師範大學附屬高級中學學生會選舉委員會",
     "shortName": "選委會",
     "abbr": "附中選委會",
-    "docNumberEnabled": true,
+    "docNumberEnabled": false,
     "docNumberPrefixes": [
       "選字", 
       "選公字", 

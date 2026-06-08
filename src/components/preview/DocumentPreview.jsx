@@ -25,9 +25,9 @@ function NumberedListPreview({ items }) {
           <span className={`flex-shrink-0 font-serif text-[16pt] ${LEVEL_COLORS[item.level] || ''}`}>
             {prefix}
           </span>
-          <span className="text-[16pt] font-serif text-[#1C2B3A] leading-relaxed whitespace-pre-wrap">
+          <div className="flex-1 text-[16pt] font-serif text-[#1C2B3A] leading-relaxed whitespace-pre-wrap" style={{ textAlign: 'justify', textJustify: 'inter-ideograph', wordBreak: 'break-all' }}>
             {item.content || <span className="text-gray-300 italic">（待填入）</span>}
-          </span>
+          </div>
         </div>
       ))}
     </div>
@@ -190,9 +190,9 @@ const DocumentPreview = forwardRef(function DocumentPreview({ showStamp, showSea
                 </span>
                 {/* Content */}
                 <div style={{ flex: 1 }}>
-                  <span style={{ fontSize: '16pt', lineHeight: '1.9', whiteSpace: 'pre-wrap' }}>
+                  <div style={{ textAlign: 'justify', textJustify: 'inter-ideograph', fontSize: '16pt', lineHeight: '1.9', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
                     {content || <span style={{ fontStyle: 'italic' }}>（待填入）</span>}
-                  </span>
+                  </div>
                 </div>
               </div>
             </div>

@@ -32,8 +32,8 @@
   },
   {
     "id": "letter",
-    "name": "函文",
-    "description": "適用於機關間往來公文",
+    "name": "函",
+    "description": "適用於機關與機關或機關與會員之間往來公文",
     "docType": "letter",
     "hasRecipients": true,
     "icon": "mail",

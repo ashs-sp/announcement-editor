@@ -137,10 +137,11 @@ export async function exportAsDocx(docState, orgData, templateData, filename = '
       children.push(
         new Paragraph({
           children: [
-            new TextRun({ text: block.content || '', size: 24, font: "標楷體" }),
+            new TextRun({ text: block.content || '', size: 24, font: 'TW-Kai-98_1' }),
           ],
           indent: { left: convertInchesToTwip(0.3) },
           spacing: { after: 100 },
+          alignment: AlignmentType.JUSTIFIED,
         })
       )
     } else if (block.type === 'numbered-list' && block.items) {
@@ -150,11 +151,12 @@ export async function exportAsDocx(docState, orgData, templateData, filename = '
         children.push(
           new Paragraph({
             children: [
-              new TextRun({ text: prefix, size: 24, font: "標楷體" }),
-              new TextRun({ text: item.content || '', size: 24, font: "標楷體" }),
+              new TextRun({ text: prefix, size: 24, font: 'TW-Kai-98_1' }),
+              new TextRun({ text: item.content || '', size: 24, font: 'TW-Kai-98_1' }),
             ],
             indent: { left: indent + convertInchesToTwip(0.3) },
             spacing: { after: 60 },
+            alignment: AlignmentType.JUSTIFIED,
           })
         )
       }
