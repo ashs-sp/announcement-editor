@@ -22,9 +22,9 @@ export function getNumberPrefix(level, index) {
     case 2:
       return `（${toChineseNumeral(index)}）`
     case 3:
-      return `${index}.`
+      return `${index}.\u00A0`
     case 4:
-      return `(${index})`
+      return `(${index})\u00A0 `
     default:
       return `${index}.`
   }
@@ -57,7 +57,7 @@ export function computeNumberedList(items) {
  * Get indent style for a level
  */
 export function getLevelIndent(level) {
-  const indents = { 1: 0, 2: 16, 3: 32, 4: 48 }
+  const indents = { 1: 0, 2: 0, 3: 64, 4: 80 }
   return indents[level] || 0
 }
 

@@ -19,7 +19,7 @@ function NumberedListPreview({ items }) {
       {numbered.map(({ item, prefix }) => (
         <div
           key={item.id}
-          className="flex items-start gap-1"
+          className="flex items-start gap-0"
           style={{ paddingLeft: `${getLevelIndent(item.level)}px` }}
         >
           <span className={`flex-shrink-0 font-serif text-[16pt] ${LEVEL_COLORS[item.level] || ''}`}>
@@ -157,30 +157,47 @@ const DocumentPreview = forwardRef(function DocumentPreview({ showStamp, showSea
 
       {/* Body */}
       <div style={{ marginTop: '12px', paddingLeft: '0' }}>
-        {enabledBlocks.map((block) => (
-          <div key={block.id} style={{ marginBottom: '2pt' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0' }}>
-              {/* Label */}
-              <span style={{
-                fontSize: '16pt',
-                flexShrink: 0,
-                // minWidth: '4.5em',
-              }}>
-                {block.label}：
-              </span>
-              {/* Content */}
-              <div style={{ flex: 1 }}>
-                {block.type === 'text' ? (
+        {enabledBlocks.map((block) => {
+          const items = block.items || []
+          const isList = block.type !== 'text'
+          const hasMultipleItems = isList && items.length > 1
+
+          if (hasMultipleItems) {
+            return (
+              <div key={block.id} style={{ marginBottom: '8pt' }}>
+                <div style={{ fontSize: '16pt' }}>{block.label}：</div>
+                <div style={{ paddingLeft: '16pt' }}>
+                  <NumberedListPreview items={items} />
+                </div>
+              </div>
+            )
+          }
+
+          // Single item list or text block
+          const content = isList 
+            ? (items[0]?.content || '') 
+            : (block.content || '')
+
+          return (
+            <div key={block.id} style={{ marginBottom: '2pt' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0' }}>
+                {/* Label */}
+                <span style={{
+                  fontSize: '16pt',
+                  flexShrink: 0,
+                }}>
+                  {block.label}：
+                </span>
+                {/* Content */}
+                <div style={{ flex: 1 }}>
                   <span style={{ fontSize: '16pt', lineHeight: '1.9', whiteSpace: 'pre-wrap' }}>
-                    {block.content || <span style={{ fontStyle: 'italic' }}>（待填入）</span>}
+                    {content || <span style={{ fontStyle: 'italic' }}>（待填入）</span>}
                   </span>
-                ) : (
-                  <NumberedListPreview items={block.items || []} />
-                )}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
       {/* Signature */}
