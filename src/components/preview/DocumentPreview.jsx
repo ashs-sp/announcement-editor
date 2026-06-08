@@ -77,11 +77,15 @@ const DocumentPreview = forwardRef(function DocumentPreview({ showStamp, recipie
         >
           <div style={{
             writingMode: 'vertical-rl',
-            fontSize: '7px',
-            color: 'rgba(160,41,26,0.55)',
-            letterSpacing: '1px',
+            fontSize: '26px',
+            color: 'rgba(160,41,26,1)',
+            letterSpacing: '-7px',
             fontFamily: "'MoeLI', 'Noto Serif TC', serif",
             userSelect: 'none',
+            border: '2px solid rgba(160,41,26,1)',
+            borderRadius: '8px',
+            paddingBottom: '7px',
+            boxSizing: 'border-box',
           }}>
             {org.abbr || org.shortName}騎縫章
           </div>
