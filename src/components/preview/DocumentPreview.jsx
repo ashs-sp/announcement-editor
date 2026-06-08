@@ -80,7 +80,7 @@ const DocumentPreview = forwardRef(function DocumentPreview({ showStamp, recipie
             fontSize: '7px',
             color: 'rgba(160,41,26,0.55)',
             letterSpacing: '1px',
-            fontFamily: "'TW-Kai-98_1', 'Noto Serif TC', serif",
+            fontFamily: "'MoeLI', 'Noto Serif TC', serif",
             userSelect: 'none',
           }}>
             {org.abbr || org.shortName}騎縫章
