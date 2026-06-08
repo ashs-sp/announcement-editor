@@ -28,7 +28,8 @@ const initialState = {
     blocks: [],
     signature: {
       title: '',
-      mode: 'title-only', // 'title-only' | 'with-name'
+      mode: 'title-only', // 'title-only' | 'with-name' | 'without-title-and-name'
+      orgMode: 'without-org-name', // 'without-org-name' | 'with-org-name'
       name: '',
     },
     recipients: {
@@ -37,6 +38,7 @@ const initialState = {
     },
     options: {
       addStamp: false,
+      addSealArea : true,
     },
   },
 }

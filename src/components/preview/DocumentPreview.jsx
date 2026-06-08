@@ -22,10 +22,10 @@ function NumberedListPreview({ items }) {
           className="flex items-start gap-1"
           style={{ paddingLeft: `${getLevelIndent(item.level)}px` }}
         >
-          <span className={`flex-shrink-0 font-serif text-sm ${LEVEL_COLORS[item.level] || ''}`}>
+          <span className={`flex-shrink-0 font-serif text-[16pt] ${LEVEL_COLORS[item.level] || ''}`}>
             {prefix}
           </span>
-          <span className="text-sm font-serif text-[#1C2B3A] leading-relaxed whitespace-pre-wrap">
+          <span className="text-[16pt] font-serif text-[#1C2B3A] leading-relaxed whitespace-pre-wrap">
             {item.content || <span className="text-gray-300 italic">（待填入）</span>}
           </span>
         </div>
@@ -34,7 +34,7 @@ function NumberedListPreview({ items }) {
   )
 }
 
-const DocumentPreview = forwardRef(function DocumentPreview({ showStamp, recipient }, ref) {
+const DocumentPreview = forwardRef(function DocumentPreview({ showStamp, showSealArea, recipient }, ref) {
   const { state } = useDocument()
   const org = useOrg()
   const template = useTemplate()
@@ -53,7 +53,7 @@ const DocumentPreview = forwardRef(function DocumentPreview({ showStamp, recipie
         width: '210mm',
         minHeight: '297mm',
         padding: '18mm 22mm 22mm 28mm',
-        fontFamily: "'TW-Kai-98_1', 'Noto Serif TC', serif",
+        fontFamily: "'PT Serif', 'TW-Kai-98_1', 'Noto Serif TC', serif",
         lineHeight: '1.9',
         color: '#1C2B3A',
         position: 'relative',
@@ -87,139 +87,92 @@ const DocumentPreview = forwardRef(function DocumentPreview({ showStamp, recipie
             paddingBottom: '7px',
             boxSizing: 'border-box',
           }}>
-            {org.name || org.abbr || org.shortName}騎縫章
+            {org.name || org.abbr || org.shortName}電子公文系統騎縫章
           </div>
         </div>
       )}
 
       {/* Document outer border */}
-      <table
+
+      {/* Header: org name */}
+      <h1
         style={{
-          width: '100%',
-          borderCollapse: 'collapse',
-          border: '1.5px solid #1C2B3A',
-          tableLayout: 'fixed',
-          marginBottom: '0',
+          fontSize: '18pt',
+          textAlign: 'center',
+          marginBottom: '10pt',
         }}
       >
-        <tbody>
-          {/* Header row: org name */}
-          <tr>
-            <td
-              colSpan={4}
-              style={{
-                border: '1px solid #1C2B3A',
-                padding: '6px 10px',
-                textAlign: 'center',
-                fontSize: '18px',
-                fontWeight: 700,
-                letterSpacing: '2px',
-              }}
-            >
-              {org.name}
-            </td>
-          </tr>
+        {org.name}　{template.name}{/* 這裡用全形空白是刻意的 */}
+      </h1>
 
-          {/* Doc type row */}
-          <tr>
-            <td
-              colSpan={4}
-              style={{
-                border: '1px solid #1C2B3A',
-                padding: '4px 10px',
-                textAlign: 'center',
-                fontSize: '16px',
-                fontWeight: 600,
-                letterSpacing: '4px',
-              }}
-            >
-              {template.name}
-            </td>
-          </tr>
+      {/* Seal placeholder */}
+      { Boolean(showSealArea) && (
+        <div style={{
+          position: 'absolute',
+          top: '35mm',
+          right: '26mm',
+          width: '28mm',
+          height: '28mm',
+          border: '1px dashed rgba(160,41,26,0.1)',
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <span style={{ fontSize: '9px', color: 'rgba(160,41,26,0.2)', fontFamily: 'sans-serif', textAlign: 'center', lineHeight: 1.4, letterSpacing: '0.35em'}}>
+            未蓋印信無效
+          </span>
+        </div>
+        )}
 
-          {/* Meta row: date + doc number + attachment */}
-          <tr>
-            <td style={{ border: '1px solid #1C2B3A', padding: '4px 8px', fontSize: '12px', width: '25%', fontWeight: 600 }}>
-              發文日期
-            </td>
-            <td style={{ border: '1px solid #1C2B3A', padding: '4px 8px', fontSize: '12px', width: '25%' }}>
-              {meta.date ? isoToROC(meta.date) : ''}
-            </td>
-            <td style={{ border: '1px solid #1C2B3A', padding: '4px 8px', fontSize: '12px', width: '20%', fontWeight: 600 }}>
-              速別
-            </td>
-            <td style={{ border: '1px solid #1C2B3A', padding: '4px 8px', fontSize: '12px', width: '30%' }}>
-              普通件
-            </td>
-          </tr>
-
-          {meta.docNumber?.enabled && (
-            <tr>
-              <td style={{ border: '1px solid #1C2B3A', padding: '4px 8px', fontSize: '12px', fontWeight: 600 }}>
-                發文字號
-              </td>
-              <td style={{ border: '1px solid #1C2B3A', padding: '4px 8px', fontSize: '12px' }} colSpan={3}>
-                {meta.docNumber.prefix}{meta.docNumber.number}
-              </td>
-            </tr>
+      {/* Recipients (for 函文) */}
+      {template.hasRecipients && (
+        <>
+          {(state.document.recipients?.primary?.length > 0) && (
+            <div style={{fontSize: '16pt'}}>
+              受文者：{recipient || state.document.recipients.primary.join('、')}
+            </div>
           )}
+        </>
+      )}
 
-          {(meta.attachment) && (
-            <tr>
-              <td style={{ border: '1px solid #1C2B3A', padding: '4px 8px', fontSize: '12px', fontWeight: 600 }}>
-                附件
-              </td>
-              <td style={{ border: '1px solid #1C2B3A', padding: '4px 8px', fontSize: '12px' }} colSpan={3}>
-                {meta.attachment}
-              </td>
-            </tr>
-          )}
 
-          {/* Recipients (for 函文) */}
-          {template.hasRecipients && (
-            <>
-              {(state.document.recipients?.primary?.length > 0) && (
-                <tr>
-                  <td style={{ border: '1px solid #1C2B3A', padding: '4px 8px', fontSize: '12px', fontWeight: 600, verticalAlign: 'top' }}>
-                    受文者
-                  </td>
-                  <td style={{ border: '1px solid #1C2B3A', padding: '4px 8px', fontSize: '12px' }} colSpan={3}>
-                    {recipient || state.document.recipients.primary.join('、')}
-                  </td>
-                </tr>
-              )}
-              {(state.document.recipients?.secondary?.length > 0) && (
-                <tr>
-                  <td style={{ border: '1px solid #1C2B3A', padding: '4px 8px', fontSize: '12px', fontWeight: 600 }}>
-                    副本
-                  </td>
-                  <td style={{ border: '1px solid #1C2B3A', padding: '4px 8px', fontSize: '12px' }} colSpan={3}>
-                    {state.document.recipients.secondary.join('、')}
-                  </td>
-                </tr>
-              )}
-            </>
-          )}
-        </tbody>
-      </table>
+      {/* Meta row: date + doc number + attachment */}
+      <div
+        className="pl-12" 
+        style={{
+          fontSize: '12pt !important',
+          textIndent: '-3em',
+          lineHeight: '1.15',
+        }}
+      >
+        <div style={{fontSize: '12pt',}}>發文日期：{meta.date ? isoToROC(meta.date) : ''}</div>
+
+        {meta.docNumber?.enabled && (
+          <div style={{fontSize: '12pt',}}>發文字號：{meta.docNumber.prefix}{meta.docNumber.number}</div>
+        )}
+
+        <div style={{fontSize: '12pt',}}>附件：{meta.attachment}</div>
+      </div>
 
       {/* Body */}
-      <div style={{ marginTop: '12px', paddingLeft: '2px' }}>
+      <div style={{ marginTop: '12px', paddingLeft: '0' }}>
         {enabledBlocks.map((block) => (
-          <div key={block.id} style={{ marginBottom: '10px' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6px' }}>
+          <div key={block.id} style={{ marginBottom: '2pt' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0' }}>
+              {/* Label */}
               <span style={{
-                fontWeight: 700,
-                fontSize: '13px',
+                fontSize: '16pt',
                 flexShrink: 0,
-                minWidth: '4.5em',
+                // minWidth: '4.5em',
               }}>
                 {block.label}：
               </span>
+              {/* Content */}
               <div style={{ flex: 1 }}>
                 {block.type === 'text' ? (
-                  <span style={{ fontSize: '13px', lineHeight: '1.9', whiteSpace: 'pre-wrap' }}>
-                    {block.content || <span style={{ color: '#ccc', fontStyle: 'italic' }}>（待填入）</span>}
+                  <span style={{ fontSize: '16pt', lineHeight: '1.9', whiteSpace: 'pre-wrap' }}>
+                    {block.content || <span style={{ fontStyle: 'italic' }}>（待填入）</span>}
                   </span>
                 ) : (
                   <NumberedListPreview items={block.items || []} />
@@ -231,43 +184,46 @@ const DocumentPreview = forwardRef(function DocumentPreview({ showStamp, recipie
       </div>
 
       {/* Signature */}
-      <div style={{ marginTop: '32px', textAlign: 'right', paddingRight: '4px' }}>
-        <div style={{ fontSize: '13px', fontWeight: 600 }}>
-          {org.name}
+      <div style={{ marginTop: '16pt', marginBottom: '16pt', paddingRight: '4px', lineHeight: '22pt' }}>
+        {/* Organizations name */}
+        <div style={{ fontSize: '16pt' }}>
+          {signature.orgMode === 'without-org-name' && org.name ? (
+            <></>
+          ) : (
+            <span>{org.name}</span>
+          )}
         </div>
-        <div style={{ fontSize: '13px', marginTop: '4px' }}>
-          <span style={{ fontWeight: 600 }}>{signature.title}</span>
+        {/* Chairperson name */}
+        <div style={{ fontSize: '16pt', marginTop: '0px', marginLeft: '32pt'}}>
+          {/* Title */}
+          {signature.mode === 'without-title-and-name' && signature.title ? (
+            <span/>
+          ) : (
+            <span>{signature.title}</span>
+          )}
+          {/* Name */}
           {signature.mode === 'with-name' && signature.name ? (
             <span style={{ marginLeft: '8px' }}>{signature.name}</span>
           ) : (
-            <span style={{
-              display: 'inline-block',
-              width: '50px',
-              borderBottom: '1px solid #999',
-              marginLeft: '8px',
-              verticalAlign: 'bottom',
-            }} />
+            <span/>
           )}
         </div>
       </div>
 
-      {/* Seal placeholder */}
-      <div style={{
-        position: 'absolute',
-        bottom: '30mm',
-        right: '26mm',
-        width: '28mm',
-        height: '28mm',
-        border: '1px dashed rgba(160,41,26,0.3)',
-        borderRadius: '50%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
-        <span style={{ fontSize: '9px', color: 'rgba(160,41,26,0.4)', fontFamily: 'sans-serif', textAlign: 'center', lineHeight: 1.4 }}>
-          印章<br/>位置
-        </span>
-      </div>
+      {template.hasRecipients && (
+        <>
+          {(state.document.recipients?.primary?.length > 0) && (
+            <div style={{ fontSize: '12pt' }}>
+                正本：{recipient || state.document.recipients.primary.join('、')}
+            </div>
+          )}
+          {(state.document.recipients?.secondary?.length > 0) && (
+            <div style={{ fontSize: '12pt' }}>
+                副本：{state.document.recipients.secondary.join('、')}
+            </div>
+          )}
+        </>
+      )}
     </div>
   )
 })

@@ -170,6 +170,7 @@ export default function ExportDialog({ onClose }) {
         <DocumentPreview
           ref={previewRef}
           showStamp={state.document.options?.addStamp}
+          showSealArea={state.document.options?.addSealArea}
         />
       </div>
     </div>

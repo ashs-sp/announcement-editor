@@ -146,7 +146,7 @@ export default function DocumentEditor() {
               </svg>
             }
           >
-            <div className="space-y-3">
+            <div className="space-y-3 my-4">
               <label className="flex items-center justify-between cursor-pointer">
                 <span className="text-sm font-sans text-ink">加上騎縫章</span>
                 <button
@@ -157,6 +157,21 @@ export default function DocumentEditor() {
                 >
                   <span className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform ${
                     options.addStamp ? 'translate-x-4.5' : 'translate-x-0.5'
+                  }`} />
+                </button>
+              </label>
+            </div>
+            <div className="space-y-3">
+              <label className="flex items-center justify-between cursor-pointer">
+                <span className="text-sm font-sans text-ink">顯示「未蓋印信無效」字樣</span>
+                <button
+                  onClick={() => actions.updateOptions({ addSealArea: !options.addSealArea })}
+                  className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+                    options.addSealArea ? 'bg-vermillion' : 'bg-border'
+                  }`}
+                >
+                  <span className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform ${
+                    options.addSealArea ? 'translate-x-4.5' : 'translate-x-0.5'
                   }`} />
                 </button>
               </label>
@@ -207,6 +222,7 @@ export default function DocumentEditor() {
             <DocumentPreview
               ref={previewRef}
               showStamp={options.addStamp}
+              showSealArea={options.addSealArea}
             />
           </div>
         </div>
