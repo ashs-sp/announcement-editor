@@ -1,0 +1,126 @@
+[
+  {
+    "id": "announcement",
+    "name": "公告",
+    "description": "適用於一般事項之對外公告",
+    "docType": "announcement",
+    "hasRecipients": false,
+    "icon": "megaphone",
+    "blocks": [
+      {
+        "id": "subject",
+        "label": "主旨",
+        "type": "text",
+        "required": true,
+        "placeholder": "簡要說明公告事由，以一段文字為原則，結尾請以「。」結束。"
+      },
+      {
+        "id": "basis",
+        "label": "依據",
+        "type": "numbered-list",
+        "required": false,
+        "placeholder": "填寫法規或決議依據，如無可刪除此區塊。"
+      },
+      {
+        "id": "content",
+        "label": "公告事項",
+        "type": "numbered-list",
+        "required": true,
+        "placeholder": "填寫公告內容。"
+      }
+    ]
+  },
+  {
+    "id": "letter",
+    "name": "函文",
+    "description": "適用於機關間往來公文",
+    "docType": "letter",
+    "hasRecipients": true,
+    "icon": "mail",
+    "blocks": [
+      {
+        "id": "subject",
+        "label": "主旨",
+        "type": "text",
+        "required": true,
+        "placeholder": "簡要說明來函事由及請求事項，結尾請以「請查照」、「請辦理見復」等語結束。"
+      },
+      {
+        "id": "basis",
+        "label": "依據",
+        "type": "numbered-list",
+        "required": false,
+        "placeholder": "填寫相關法規或往來公文依據。"
+      },
+      {
+        "id": "content",
+        "label": "說明",
+        "type": "numbered-list",
+        "required": false,
+        "placeholder": "詳述主旨所提事項，條列說明。"
+      },
+      {
+        "id": "action",
+        "label": "辦法",
+        "type": "numbered-list",
+        "required": false,
+        "placeholder": "請求受文者採取之具體行動。"
+      }
+    ]
+  },
+  {
+    "id": "notice",
+    "name": "通知",
+    "description": "適用於一般通知事項",
+    "docType": "notice",
+    "hasRecipients": false,
+    "icon": "bell",
+    "blocks": [
+      {
+        "id": "subject",
+        "label": "主旨",
+        "type": "text",
+        "required": true,
+        "placeholder": "簡要說明通知事由。"
+      },
+      {
+        "id": "content",
+        "label": "說明",
+        "type": "numbered-list",
+        "required": true,
+        "placeholder": "填寫通知內容。"
+      }
+    ]
+  },
+  {
+    "id": "resolution",
+    "name": "決議",
+    "description": "適用於議事決議紀錄與公告",
+    "docType": "resolution",
+    "hasRecipients": false,
+    "icon": "gavel",
+    "blocks": [
+      {
+        "id": "subject",
+        "label": "主旨",
+        "type": "text",
+        "required": true,
+        "placeholder": "說明本次決議之主要事項。"
+      },
+      {
+        "id": "basis",
+        "label": "依據",
+        "type": "numbered-list",
+        "required": false,
+        "placeholder": "填寫相關規程或前次決議依據。"
+      },
+      {
+        "id": "resolution_items",
+        "label": "決議事項",
+        "type": "numbered-list",
+        "required": true,
+        "placeholder": "逐條列出決議內容。"
+      }
+    ]
+  }
+]

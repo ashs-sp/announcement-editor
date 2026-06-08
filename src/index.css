@@ -1,0 +1,163 @@
+@import url('https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Noto Sans TC', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: #F7F4EE;
+    color: #1C2B3A;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #DDD8CE transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: #DDD8CE;
+    border-radius: 3px;
+  }
+}
+
+/* Document preview specific styles */
+#print-area * {
+  font-family: 'PT Serif', 'TW-Kai-98_1', 'Noto Serif TC', serif;
+}
+
+.doc-preview {
+  font-family: 'TW-Kai-98_1', 'Noto Serif TC', serif;
+  line-height: 2;
+  color: #1C2B3A;
+}
+
+.doc-preview-page {
+  width: 210mm;
+  min-height: 297mm;
+  padding: 20mm 25mm 25mm 30mm;
+  background: white;
+  position: relative;
+}
+
+/* Page stamp (騎縫章) overlay */
+.seam-stamp-overlay {
+  position: absolute;
+  top: 0;
+  right: -2mm;
+  width: 8mm;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.seam-stamp-text {
+  writing-mode: vertical-rl;
+  font-family: 'MoeLI', serif;
+  font-size: 8px;
+  color: rgba(160, 41, 26, 0.6);
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+/* Official document table border */
+.doc-outer-border {
+  border: 1.5px solid #1C2B3A;
+}
+
+.doc-header-cell {
+  border: 1px solid #1C2B3A;
+  padding: 4px 8px;
+}
+
+/* Print styles */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #print-area, #print-area * {
+    visibility: visible;
+  }
+  #print-area {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .doc-preview-page {
+    margin: 0;
+    padding: 15mm 20mm 20mm 25mm;
+    box-shadow: none;
+  }
+  @page {
+    size: A4;
+    margin: 0;
+  }
+}
+
+/* Animated underline for inputs */
+.doc-input {
+  border: none;
+  border-bottom: 1px solid #DDD8CE;
+  background: transparent;
+  outline: none;
+  transition: border-color 0.2s;
+  font-family: 'Noto Sans TC', sans-serif;
+}
+
+.doc-input:focus {
+  border-bottom-color: #A0291A;
+}
+
+/* Block drag handle */
+.drag-handle {
+  cursor: grab;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.block-row:hover .drag-handle {
+  opacity: 1;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+/* Step indicator */
+.step-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #DDD8CE;
+  transition: all 0.3s;
+}
+
+.step-dot.active {
+  background: #A0291A;
+  width: 24px;
+  border-radius: 4px;
+}
+
+.step-dot.done {
+  background: #B8955A;
+}
