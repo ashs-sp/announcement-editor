@@ -1,5 +1,22 @@
 [
   {
+    "id": "student_parliament",
+    "name": "國立高雄師範大學附屬高級中學學生議會",
+    "shortName": "學生議會",
+    "abbr": "附中學生議會",
+    "docNumberEnabled": true,
+    "docNumberPrefixes": [
+      "議字", 
+      "議秘字"
+    ],
+    "templateIds": ["announcement", "letter", "notice", "resolution"],
+    "leaders": [
+      { "title": "議　長", "honorific": "" },
+      { "title": "副議長", "honorific": "代行" },
+      { "title": "秘書長", "honorific": "代行" }
+    ]
+  },
+  {
     "id": "student_council",
     "name": "國立高雄師範大學附屬高級中學學生會",
     "shortName": "學生會",
@@ -16,23 +33,6 @@
       { "title": "副會長", "honorific": "代行" },
       { "title": "議　長", "honorific": "代行" },
       { "title": "副議長", "honorific": "代行" }
-    ]
-  },
-  {
-    "id": "student_parliament",
-    "name": "國立高雄師範大學附屬高級中學學生議會",
-    "shortName": "學生議會",
-    "abbr": "附中學生議會",
-    "docNumberEnabled": true,
-    "docNumberPrefixes": [
-      "議字", 
-      "議秘字"
-    ],
-    "templateIds": ["announcement", "letter", "notice", "resolution"],
-    "leaders": [
-      { "title": "議　長", "honorific": "" },
-      { "title": "副議長", "honorific": "代行" },
-      { "title": "秘書長", "honorific": "代行" }
     ]
   },
   {
