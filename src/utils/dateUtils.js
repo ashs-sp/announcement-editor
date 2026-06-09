@@ -24,7 +24,7 @@ export function isoToROC(isoDate) {
   const d = dayjs(isoDate)
   if (!d.isValid()) return isoDate
   const rocYear = d.year() - 1911
-  return `民國 ${rocYear} 年 ${d.month() + 1} 月 ${d.date()} 日`
+  return `中華民國 ${rocYear} 年 ${d.month() + 1} 月 ${d.date()} 日`
 }
 
 /**
