@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body {
+    background: #ccc;
+    padding: 20px;
+  }
+  .pages-wrapper {
+    /* Make the block flow direction horizontal */
+    writing-mode: vertical-lr; 
+    
+    /* The column container */
+    background: transparent;
+    height: 100%; /* or auto? */
+  }
+  
+  .content {
+    /* Reset writing mode for the actual text */
+    writing-mode: horizontal-tb;
+    
+    /* Since parent is vertical-lr, inline dimension is height, block dimension is width! */
+    /* So columns will expand block-wise, which is to the RIGHT. Oh wait. */
+    /* If we want columns to expand downwards, the block dimension must be downwards. */
+    /* But horizontal-tb block dimension IS downwards. */
+    /* Wait, standard columns expand inline-wise! */
+  }
+</style>
+</head>
+<body>
+<div class="pages-wrapper">
+  <div class="content">
+     ...
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  .container {
+    width: 210mm;
+    border: 1px solid black;
+    line-height: 1.5;
+  }
+  .spacer {
+    float: left;
+    width: 100%;
+    height: 1000mm;
+    shape-outside: polygon(
+      0 0,
+      0 277mm, 100% 277mm, 100% 297mm, 0 297mm,
+      0 574mm, 100% 574mm, 100% 594mm, 0 594mm,
+      0 871mm, 100% 871mm, 100% 891mm, 0 891mm
+    );
+    margin: 0; padding: 0;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="spacer"></div>
+  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+  <!-- Repeat a lot to make it overflow -->
+  <p>Lorem ipsum dolor sit amet...</p>
+</div>
+</body>
+</html>

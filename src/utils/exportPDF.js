@@ -20,6 +20,10 @@ export async function exportElementAsPDF(element, filename = 'document', options
     allowTaint: true,
     backgroundColor: '#ffffff',
     logging: false,
+    onclone: (doc) => {
+      const elements = doc.querySelectorAll('.page-break-line')
+      elements.forEach(el => el.style.borderBottom = 'none')
+    }
   })
 
   const imgData = canvas.toDataURL('image/png')
@@ -44,7 +48,7 @@ export async function exportElementAsPDF(element, filename = 'document', options
   heightLeft -= pageHeight
 
   // Add more pages if content is longer than one page
-  while (heightLeft > 0) {
+  while (heightLeft >= 1) {
     position = heightLeft - imgHeight
     pdf.addPage()
     pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
@@ -91,6 +95,10 @@ export async function exportMergedPDF(elements, filename = 'document', options =
       allowTaint: true,
       backgroundColor: '#ffffff',
       logging: false,
+      onclone: (doc) => {
+        const elements = doc.querySelectorAll('.page-break-line')
+        elements.forEach(el => el.style.borderBottom = 'none')
+      }
     })
 
     const imgData = canvas.toDataURL('image/png')
@@ -106,7 +114,7 @@ export async function exportMergedPDF(elements, filename = 'document', options =
     heightLeft -= pageHeight
     isFirstPage = false
 
-    while (heightLeft > 0) {
+    while (heightLeft >= 1) {
       position = heightLeft - imgHeight
       pdf.addPage()
       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)

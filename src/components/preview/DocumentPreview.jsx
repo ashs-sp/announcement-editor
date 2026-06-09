@@ -1,4 +1,4 @@
-import { forwardRef } from 'react'
+import { forwardRef, useState, useEffect, useRef, useImperativeHandle } from 'react'
 import { useDocument, useOrg, useTemplate } from '../../context/DocumentContext'
 import { computeNumberedList, getLevelIndent } from '../../utils/numbering'
 import { isoToROC, isoToROCShort } from '../../utils/dateUtils'
@@ -19,7 +19,7 @@ function NumberedListPreview({ items }) {
       {numbered.map(({ item, prefix }) => (
         <div
           key={item.id}
-          className="flex items-start gap-0"
+          className="content-block flex items-start gap-0"
           style={{ paddingLeft: `${getLevelIndent(item.level)}px` }}
         >
           <span className={`flex-shrink-0 font-serif text-[16pt] ${LEVEL_COLORS[item.level] || ''}`}>
@@ -40,18 +40,71 @@ const DocumentPreview = forwardRef(function DocumentPreview({ showStamp, showSea
   const template = useTemplate()
   const { meta, blocks, signature, options } = state.document
 
+  const internalRef = useRef(null)
+  const [pages, setPages] = useState(1)
+
+  useImperativeHandle(ref, () => internalRef.current)
+
+  useEffect(() => {
+    if (!internalRef.current) return
+    const observer = new ResizeObserver(() => {
+      if (internalRef.current) {
+        const originalMinHeight = internalRef.current.style.minHeight
+        internalRef.current.style.minHeight = '0px'
+
+        // Reset margins first to calculate natural flow
+        const blocks = internalRef.current.querySelectorAll('.content-block')
+        blocks.forEach(b => {
+          b.style.marginTop = '0px'
+        })
+
+        // Force a reflow
+        void internalRef.current.offsetHeight
+
+        const mmToPx = 96 / 25.4
+        const pageHeightPx = 297 * mmToPx
+        const footerHeightPx = 25 * mmToPx // Avoid the bottom 25mm
+
+        blocks.forEach(block => {
+          const rect = block.getBoundingClientRect()
+          const parentRect = internalRef.current.getBoundingClientRect()
+          const offsetTop = rect.top - parentRect.top
+
+          const pageIndex = Math.floor(offsetTop / pageHeightPx)
+          const pageBottom = (pageIndex + 1) * pageHeightPx
+
+          // If block touches the footer area and it's not taller than a whole page
+          if (offsetTop + rect.height > pageBottom - footerHeightPx && rect.height < pageHeightPx - footerHeightPx) {
+            // Push it to the next page top (plus 18mm top margin)
+            const pushAmount = pageBottom - offsetTop + (18 * mmToPx)
+            block.style.marginTop = `${pushAmount}px`
+          }
+        })
+
+        // Recalculate total pages based on new height
+        const heightPx = internalRef.current.getBoundingClientRect().height
+        const calculatedPages = Math.max(1, Math.ceil(heightPx / pageHeightPx))
+        setPages(calculatedPages)
+
+        internalRef.current.style.minHeight = originalMinHeight
+      }
+    })
+    observer.observe(internalRef.current)
+    return () => observer.disconnect()
+  }, [state.document])
+
   if (!org || !template) return null
 
   const enabledBlocks = blocks.filter(b => b._enabled)
 
   return (
     <div
-      ref={ref}
+      ref={internalRef}
       id="print-area"
       className="doc-preview bg-white"
       style={{
         width: '210mm',
-        minHeight: '297mm',
+        minHeight: `${pages * 297}mm`,
         padding: '18mm 22mm 22mm 28mm',
         fontFamily: "'PT Serif', 'TW-Kai-98_1', 'Noto Serif TC', serif",
         lineHeight: '1.9',
@@ -96,6 +149,7 @@ const DocumentPreview = forwardRef(function DocumentPreview({ showStamp, showSea
 
       {/* Header: org name */}
       <h1
+        className="content-block"
         style={{
           fontSize: '18pt',
           textAlign: 'center',
@@ -127,19 +181,19 @@ const DocumentPreview = forwardRef(function DocumentPreview({ showStamp, showSea
 
       {/* Recipients (for 函文) */}
       {template.hasRecipients && (
-        <>
+        <div className="content-block">
           {(state.document.recipients?.primary?.length > 0) && (
             <div style={{fontSize: '16pt'}}>
               受文者：{recipient || state.document.recipients.primary.join('、')}
             </div>
           )}
-        </>
+        </div>
       )}
 
 
       {/* Meta row: date + doc number + attachment */}
       <div
-        className="pl-12" 
+        className="content-block pl-12" 
         style={{
           fontSize: '12pt !important',
           textIndent: '-3em',
@@ -165,7 +219,7 @@ const DocumentPreview = forwardRef(function DocumentPreview({ showStamp, showSea
           if (hasMultipleItems) {
             return (
               <div key={block.id} style={{ marginBottom: '8pt' }}>
-                <div style={{ fontSize: '16pt' }}>{block.label}：</div>
+                <div className="content-block" style={{ fontSize: '16pt' }}>{block.label}：</div>
                 <div style={{ paddingLeft: '16pt' }}>
                   <NumberedListPreview items={items} />
                 </div>
@@ -179,7 +233,7 @@ const DocumentPreview = forwardRef(function DocumentPreview({ showStamp, showSea
             : (block.content || '')
 
           return (
-            <div key={block.id} style={{ marginBottom: '2pt' }}>
+            <div key={block.id} className="content-block" style={{ marginBottom: '2pt' }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0' }}>
                 {/* Label */}
                 <span style={{
@@ -201,7 +255,7 @@ const DocumentPreview = forwardRef(function DocumentPreview({ showStamp, showSea
       </div>
 
       {/* Signature */}
-      <div style={{ marginTop: '16pt', marginBottom: '16pt', paddingRight: '4px', lineHeight: '22pt' }}>
+      <div className="content-block" style={{ marginTop: '16pt', marginBottom: '16pt', paddingRight: '4px', lineHeight: '22pt' }}>
         {/* Organizations name */}
         <div style={{ fontSize: '16pt' }}>
           {signature.orgMode === 'without-org-name' && org.name ? (
@@ -228,7 +282,7 @@ const DocumentPreview = forwardRef(function DocumentPreview({ showStamp, showSea
       </div>
 
       {template.hasRecipients && (
-        <>
+        <div className="content-block">
           {(state.document.recipients?.primary?.length > 0) && (
             <div style={{ fontSize: '12pt' }}>
                 正本：{recipient || state.document.recipients.primary.join('、')}
@@ -239,8 +293,40 @@ const DocumentPreview = forwardRef(function DocumentPreview({ showStamp, showSea
                 副本：{state.document.recipients.secondary.join('、')}
             </div>
           )}
-        </>
+        </div>
       )}
+
+      {/* Page Breaks and Footers overlay */}
+      {Array.from({ length: pages }).map((_, i) => (
+        <div
+          key={`page-overlay-${i}`}
+          className="page-break-line"
+          style={{
+            position: 'absolute',
+            top: `${i * 297}mm`,
+            left: 0,
+            width: '210mm',
+            height: '297mm',
+            pointerEvents: 'none',
+            boxSizing: 'border-box',
+            zIndex: 10,
+          }}
+        >
+          {pages > 1 && (
+            <div style={{
+              position: 'absolute',
+              bottom: '15mm',
+              width: '100%',
+              textAlign: 'center',
+              fontSize: '10pt',
+              fontFamily: "'PT Serif', 'TW-Kai-98_1', 'Noto Serif TC', serif",
+              color: '#1C2B3A',
+            }}>
+              第 {i + 1} 頁，共 {pages} 頁
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   )
 })

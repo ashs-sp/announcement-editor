@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { useDocument, useOrg, useTemplate } from '../../context/DocumentContext'
 import { exportElementAsPDF, exportMultiplePDFs } from '../../utils/exportPDF'
+import { exportElementAsImage } from '../../utils/exportImage'
 import { exportAsDocx } from '../../utils/exportDocx'
 import { isoToROCShort } from '../../utils/dateUtils'
 import DocumentPreview from '../preview/DocumentPreview'
@@ -59,6 +60,18 @@ export default function ExportDialog({ onClose }) {
     }
   }
 
+  const handleExportImage = async () => {
+    setExporting(true)
+    try {
+      await exportElementAsImage(previewRef.current, getFilename(), { format: 'image/png' })
+    } catch (err) {
+      console.error('Export failed:', err)
+      alert('匯出失敗，請稍後再試。')
+    } finally {
+      setExporting(false)
+    }
+  }
+
   const handlePrint = () => {
     window.print()
   }
@@ -91,10 +104,11 @@ export default function ExportDialog({ onClose }) {
             <p className="text-xs font-sans font-medium text-ink-muted uppercase tracking-wide mb-3">
               匯出格式
             </p>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-4 gap-2">
               {[
                 { id: 'pdf', label: 'PDF', desc: '最終版本', icon: '📄' },
                 { id: 'docx', label: 'Word', desc: '.docx 格式', icon: '📝' },
+                { id: 'png', label: '圖片', desc: '.png 格式', icon: '🖼️' },
                 { id: 'print', label: '列印', desc: '直接印出', icon: '🖨️' },
               ].map(f => (
                 <button
@@ -126,7 +140,7 @@ export default function ExportDialog({ onClose }) {
           <div className="bg-parchment rounded-xl px-4 py-3">
             <p className="text-[10px] text-ink-muted font-sans uppercase tracking-wide mb-1">檔案名稱預覽</p>
             <p className="text-sm font-mono text-ink">
-              {getFilename()}.{exportFormat === 'docx' ? 'docx' : exportFormat === 'print' ? '（直接列印）' : 'pdf'}
+              {getFilename()}.{exportFormat === 'docx' ? 'docx' : exportFormat === 'print' ? '（直接列印）' : exportFormat === 'png' ? 'png' : 'pdf'}
             </p>
           </div>
         </div>
@@ -140,7 +154,7 @@ export default function ExportDialog({ onClose }) {
             取消
           </button>
           <button
-            onClick={exportFormat === 'pdf' ? handleExportPDF : exportFormat === 'docx' ? handleExportDocx : handlePrint}
+            onClick={exportFormat === 'pdf' ? handleExportPDF : exportFormat === 'docx' ? handleExportDocx : exportFormat === 'png' ? handleExportImage : handlePrint}
             disabled={exporting}
             className="flex-1 py-2.5 rounded-xl bg-ink text-white text-sm font-sans hover:bg-ink-light
                        disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"

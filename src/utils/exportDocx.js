@@ -198,6 +198,22 @@ export async function exportAsDocx(docState, orgData, templateData, filename = '
             },
           },
         },
+        footers: {
+          default: new Footer({
+            children: [
+              new Paragraph({
+                alignment: AlignmentType.CENTER,
+                children: [
+                  new TextRun({ text: "第 ", size: 20, font: '標楷體' }),
+                  new TextRun({ children: [PageNumber.CURRENT], size: 20, font: '標楷體' }),
+                  new TextRun({ text: " 頁，共 ", size: 20, font: '標楷體' }),
+                  new TextRun({ children: [PageNumber.TOTAL_PAGES], size: 20, font: '標楷體' }),
+                  new TextRun({ text: " 頁", size: 20, font: '標楷體' }),
+                ],
+              }),
+            ],
+          }),
+        },
         children,
       },
     ],
