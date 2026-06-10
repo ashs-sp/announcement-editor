@@ -73,8 +73,10 @@ const DocumentPreview = forwardRef(function DocumentPreview({ showStamp, showSea
           const pageIndex = Math.floor(offsetTop / pageHeightPx)
           const pageBottom = (pageIndex + 1) * pageHeightPx
 
-          // If block touches the footer area and it's not taller than a whole page
-          if (offsetTop + rect.height > pageBottom - footerHeightPx && rect.height < pageHeightPx - footerHeightPx) {
+          // If block touches the footer area and it's relatively short, push it to the next page.
+          // If it's a long block (e.g. > 120px, roughly 3 lines), we let it break naturally across pages
+          // so we don't leave a massive blank gap at the bottom of the previous page.
+          if (offsetTop + rect.height > pageBottom - footerHeightPx && rect.height < 120) {
             // Push it to the next page top (plus 18mm top margin)
             const pushAmount = pageBottom - offsetTop + (18 * mmToPx)
             block.style.marginTop = `${pushAmount}px`

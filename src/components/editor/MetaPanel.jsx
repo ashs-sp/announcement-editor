@@ -48,18 +48,21 @@ export default function MetaPanel() {
 
         {meta.docNumber.enabled && (
           <div className="flex items-center gap-2">
-            {/* Prefix selector */}
-            <select
+            {/* Prefix selector / input */}
+            <input
+              list="doc-prefixes"
               value={meta.docNumber.prefix}
               onChange={e => actions.updateDocNumber({ prefix: e.target.value })}
-              className="text-sm font-sans border border-border rounded-lg px-2 py-2 bg-surface text-ink
+              placeholder="字軌"
+              className="w-24 text-sm font-sans border border-border rounded-lg px-2 py-2 bg-surface text-ink
                          focus:outline-none focus:ring-2 focus:ring-vermillion/20 focus:border-vermillion/50
                          transition-all flex-shrink-0"
-            >
+            />
+            <datalist id="doc-prefixes">
               {(org?.docNumberPrefixes || []).map(p => (
                 <option key={p} value={p}>{p}</option>
               ))}
-            </select>
+            </datalist>
             <input
               type="text"
               value={meta.docNumber.number}
