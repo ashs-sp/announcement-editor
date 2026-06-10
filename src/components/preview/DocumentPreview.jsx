@@ -41,6 +41,7 @@ const DocumentPreview = forwardRef(function DocumentPreview({ showStamp, showSea
   const { meta, blocks, signature, options } = state.document
 
   const internalRef = useRef(null)
+  const lastLayoutRef = useRef('') // to track changes and prevent infinite loops
   const [pages, setPages] = useState(1)
 
   useImperativeHandle(ref, () => internalRef.current)
@@ -52,20 +53,29 @@ const DocumentPreview = forwardRef(function DocumentPreview({ showStamp, showSea
         const originalMinHeight = internalRef.current.style.minHeight
         internalRef.current.style.minHeight = '0px'
 
-        // Reset margins first to calculate natural flow
+        // 1. Temporarily remove all adjustments to measure natural flow
+        const existingAvoids = internalRef.current.querySelectorAll('.avoid-zone')
+        existingAvoids.forEach(el => el.style.display = 'none')
+
         const blocks = internalRef.current.querySelectorAll('.content-block')
+        const originalMargins = []
         blocks.forEach(b => {
+          originalMargins.push(b.style.marginTop)
           b.style.marginTop = '0px'
         })
 
-        // Force a reflow
+        // Force reflow
         void internalRef.current.offsetHeight
 
         const mmToPx = 96 / 25.4
         const pageHeightPx = 297 * mmToPx
-        const footerHeightPx = 25 * mmToPx // Avoid the bottom 25mm
+        const footerHeightPx = 25 * mmToPx
+        const topMarginPx = 18 * mmToPx
 
-        blocks.forEach(block => {
+        let newLayoutSignature = ''
+        const layoutActions = []
+
+        blocks.forEach((block, index) => {
           const rect = block.getBoundingClientRect()
           const parentRect = internalRef.current.getBoundingClientRect()
           const offsetTop = rect.top - parentRect.top
@@ -73,20 +83,77 @@ const DocumentPreview = forwardRef(function DocumentPreview({ showStamp, showSea
           const pageIndex = Math.floor(offsetTop / pageHeightPx)
           const pageBottom = (pageIndex + 1) * pageHeightPx
 
-          // If block touches the footer area and it's relatively short, push it to the next page.
-          // If it's a long block (e.g. > 120px, roughly 3 lines), we let it break naturally across pages
-          // so we don't leave a massive blank gap at the bottom of the previous page.
-          if (offsetTop + rect.height > pageBottom - footerHeightPx && rect.height < 120) {
-            // Push it to the next page top (plus 18mm top margin)
-            const pushAmount = pageBottom - offsetTop + (18 * mmToPx)
-            block.style.marginTop = `${pushAmount}px`
+          if (offsetTop + rect.height > pageBottom - footerHeightPx) {
+            if (rect.height < 120) {
+              const pushAmount = pageBottom - offsetTop + topMarginPx
+              layoutActions.push(() => block.style.marginTop = `${pushAmount}px`)
+              newLayoutSignature += `M${index}:${pushAmount}|`
+            } else {
+              let currentBottom = pageBottom
+              let currentHeight = rect.height
+              const avoidZones = []
+              
+              while (offsetTop + currentHeight > currentBottom - footerHeightPx) {
+                const avoidStart = currentBottom - footerHeightPx - offsetTop
+                const avoidHeight = footerHeightPx + topMarginPx
+                avoidZones.push({ start: avoidStart, height: avoidHeight })
+                currentHeight += avoidHeight
+                currentBottom += pageHeightPx
+              }
+
+              if (avoidZones.length > 0) {
+                let polygonPoints = []
+                let maxEnd = 0
+                avoidZones.forEach(zone => {
+                  const end = zone.start + zone.height
+                  polygonPoints.push(`0 ${zone.start}px, 100% ${zone.start}px, 100% ${end}px, 0 ${end}px`)
+                  if (end > maxEnd) maxEnd = end
+                })
+                
+                const polygonStr = `polygon(${polygonPoints.join(', ')})`
+                newLayoutSignature += `A${index}:${maxEnd}:${polygonStr}|`
+                
+                layoutActions.push(() => {
+                  let textContainer = block.querySelector('.flex-1') || block
+                  
+                  // Check if we already have an avoid-zone here
+                  let avoidEl = textContainer.querySelector('.avoid-zone')
+                  if (!avoidEl) {
+                    avoidEl = document.createElement('div')
+                    avoidEl.className = 'avoid-zone'
+                    avoidEl.style.float = 'left'
+                    avoidEl.style.width = '100%'
+                    avoidEl.style.margin = '0'
+                    avoidEl.style.padding = '0'
+                    textContainer.insertBefore(avoidEl, textContainer.firstChild)
+                  }
+                  avoidEl.style.display = 'block'
+                  avoidEl.style.height = `${maxEnd}px`
+                  avoidEl.style.shapeOutside = polygonStr
+                })
+              }
+            }
           }
         })
 
-        // Recalculate total pages based on new height
         const heightPx = internalRef.current.getBoundingClientRect().height
         const calculatedPages = Math.max(1, Math.ceil(heightPx / pageHeightPx))
-        setPages(calculatedPages)
+        newLayoutSignature += `P${calculatedPages}`
+
+        // 2. Only apply if something changed (breaks the infinite loop)
+        if (newLayoutSignature !== lastLayoutRef.current) {
+          lastLayoutRef.current = newLayoutSignature
+          // Actually apply the actions
+          existingAvoids.forEach(el => el.remove()) // clean up to start fresh
+          blocks.forEach(b => b.style.marginTop = '0px')
+          layoutActions.forEach(action => action())
+          
+          setPages(calculatedPages)
+        } else {
+          // Revert our temporary removals since nothing changed
+          existingAvoids.forEach(el => el.style.display = 'block')
+          blocks.forEach((b, i) => b.style.marginTop = originalMargins[i])
+        }
 
         internalRef.current.style.minHeight = originalMinHeight
       }
