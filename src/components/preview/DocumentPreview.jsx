@@ -55,12 +55,17 @@ const DocumentPreview = forwardRef(function DocumentPreview({ showStamp, showSea
 
         // 1. Temporarily remove all adjustments to measure natural flow
         const existingAvoids = internalRef.current.querySelectorAll('.avoid-zone')
+        const hadAvoids = existingAvoids.length > 0
         existingAvoids.forEach(el => el.style.display = 'none')
 
         const blocks = internalRef.current.querySelectorAll('.content-block')
         const originalMargins = []
+        let hadMargins = false
         blocks.forEach(b => {
           originalMargins.push(b.style.marginTop)
+          if (b.style.marginTop && b.style.marginTop !== '0px') {
+            hadMargins = true
+          }
           b.style.marginTop = '0px'
         })
 
@@ -140,8 +145,16 @@ const DocumentPreview = forwardRef(function DocumentPreview({ showStamp, showSea
         const calculatedPages = Math.max(1, Math.ceil(heightPx / pageHeightPx))
         newLayoutSignature += `P${calculatedPages}`
 
-        // 2. Only apply if something changed (breaks the infinite loop)
-        if (newLayoutSignature !== lastLayoutRef.current) {
+        const needsAvoids = newLayoutSignature.includes('A')
+        const needsMargins = newLayoutSignature.includes('M')
+        
+        // Detect if React re-rendered and wiped out our manual DOM adjustments
+        let domWiped = false
+        if (needsAvoids && !hadAvoids) domWiped = true
+        if (needsMargins && !hadMargins) domWiped = true
+
+        // 2. Only apply if something changed OR if React wiped out our nodes
+        if (newLayoutSignature !== lastLayoutRef.current || domWiped) {
           lastLayoutRef.current = newLayoutSignature
           // Actually apply the actions
           existingAvoids.forEach(el => el.remove()) // clean up to start fresh
