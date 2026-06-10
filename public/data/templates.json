@@ -1,5 +1,14 @@
 [
   {
+    "id": "order",
+    "name": "會長令",
+    "description": "適用於公布法規制定、修正或廢止",
+    "docType": "order",
+    "hasRecipients": false,
+    "icon": "stamp",
+    "blocks": []
+  },
+  {
     "id": "announcement",
     "name": "公告",
     "description": "適用於一般事項之對外公告",
@@ -25,7 +34,7 @@
         "id": "content",
         "label": "公告事項",
         "type": "numbered-list",
-        "required": true,
+        "required": false,
         "placeholder": "填寫公告內容。"
       }
     ]
@@ -70,10 +79,10 @@
   },
   {
     "id": "notice",
-    "name": "通知",
+    "name": "通知單",
     "description": "適用於一般通知事項",
     "docType": "notice",
-    "hasRecipients": false,
+    "hasRecipients": true,
     "icon": "bell",
     "blocks": [
       {
@@ -84,20 +93,27 @@
         "placeholder": "簡要說明通知事由。"
       },
       {
+        "id": "basis",
+        "label": "依據",
+        "type": "numbered-list",
+        "required": false,
+        "placeholder": "填寫相關法規或往來公文依據。"
+      },
+      {
         "id": "content",
         "label": "說明",
         "type": "numbered-list",
-        "required": true,
+        "required": false,
         "placeholder": "填寫通知內容。"
       }
     ]
   },
   {
     "id": "resolution",
-    "name": "決議",
-    "description": "適用於議事決議紀錄與公告",
+    "name": "書函",
+    "description": "適用未決、例行性、或簡單日常行政庶務",
     "docType": "resolution",
-    "hasRecipients": false,
+    "hasRecipients": true,
     "icon": "gavel",
     "blocks": [
       {
@@ -112,14 +128,14 @@
         "label": "依據",
         "type": "numbered-list",
         "required": false,
-        "placeholder": "填寫相關規程或前次決議依據。"
+        "placeholder": "填寫相關法規或往來公文依據。"
       },
       {
-        "id": "resolution_items",
-        "label": "決議事項",
+        "id": "content",
+        "label": "說明",
         "type": "numbered-list",
         "required": true,
-        "placeholder": "逐條列出決議內容。"
+        "placeholder": "填寫通知內容。"
       }
     ]
   }

@@ -4,6 +4,27 @@ import { getTodayISO } from '../utils/dateUtils'
 
 const DocumentContext = createContext(null)
 
+const initialOrderState = {
+  sessionNumber: '',      // 屆次（國字大寫，如「十二」）
+  orderNumber: '',        // 令字第XXXXXXX號
+  regulationName: '',     // 法規名稱
+  // 動作組合：至少一個為 true
+  doDelete: false,
+  doEnact: false,
+  doAmend: false,
+  deleteArticles: '',     // 刪除的條文（如「第1條、第5條至第8條」）
+  enactArticles: '',      // 制定的條文
+  amendArticles: '',      // 修正的條文
+  // 署名
+  signatureTitle: '',     // 職銜
+  signatureName: '',      // 名稱
+  // 法規附件
+  appendixEnabled: false,
+  appendixEntries: [],    // [{id, scopeType: 'title'|'articles', title: '', articlesRef: '', content: ''}]
+  // 附圖（每頁一張）
+  images: [],             // [{id, name, dataUrl}]
+}
+
 const initialState = {
   // Navigation
   step: 0, // 0=org, 1=template, 2=editor
@@ -38,8 +59,10 @@ const initialState = {
     },
     options: {
       addStamp: false,
-      addSealArea : true,
+      addSealArea: true,
     },
+    // 會長令專用欄位
+    order: { ...initialOrderState },
   },
 }
 
@@ -71,6 +94,10 @@ function reducer(state, action) {
           signature: {
             ...state.document.signature,
             title: org?.leaders?.[0]?.title ?? '',
+          },
+          order: {
+            ...state.document.order,
+            signatureTitle: org?.leaders?.[0]?.title ?? '',
           },
         },
       }
@@ -250,6 +277,109 @@ function reducer(state, action) {
         document: { ...state.document, blocks: action.payload },
       }
 
+    // ──────────────────────────────────────────────
+    // 會長令 actions
+    // ──────────────────────────────────────────────
+
+    case 'UPDATE_ORDER':
+      return {
+        ...state,
+        document: {
+          ...state.document,
+          order: { ...state.document.order, ...action.payload },
+        },
+      }
+
+    case 'ADD_APPENDIX_ENTRY': {
+      const newEntry = {
+        id: uuidv4(),
+        scopeType: 'title',   // 'title' | 'articles'
+        title: '',            // 法規標題（scopeType='title' 時使用）
+        articlesRef: '',      // 條文參照（scopeType='articles' 時使用）
+        content: '',          // 條文內容（多行）
+      }
+      return {
+        ...state,
+        document: {
+          ...state.document,
+          order: {
+            ...state.document.order,
+            appendixEntries: [...state.document.order.appendixEntries, newEntry],
+          },
+        },
+      }
+    }
+
+    case 'UPDATE_APPENDIX_ENTRY': {
+      const { entryId, updates } = action.payload
+      return {
+        ...state,
+        document: {
+          ...state.document,
+          order: {
+            ...state.document.order,
+            appendixEntries: state.document.order.appendixEntries.map(e =>
+              e.id === entryId ? { ...e, ...updates } : e
+            ),
+          },
+        },
+      }
+    }
+
+    case 'DELETE_APPENDIX_ENTRY': {
+      return {
+        ...state,
+        document: {
+          ...state.document,
+          order: {
+            ...state.document.order,
+            appendixEntries: state.document.order.appendixEntries.filter(
+              e => e.id !== action.payload
+            ),
+          },
+        },
+      }
+    }
+
+    case 'REORDER_APPENDIX_ENTRIES': {
+      return {
+        ...state,
+        document: {
+          ...state.document,
+          order: {
+            ...state.document.order,
+            appendixEntries: action.payload,
+          },
+        },
+      }
+    }
+
+    case 'ADD_ORDER_IMAGE': {
+      return {
+        ...state,
+        document: {
+          ...state.document,
+          order: {
+            ...state.document.order,
+            images: [...state.document.order.images, action.payload],
+          },
+        },
+      }
+    }
+
+    case 'DELETE_ORDER_IMAGE': {
+      return {
+        ...state,
+        document: {
+          ...state.document,
+          order: {
+            ...state.document.order,
+            images: state.document.order.images.filter(img => img.id !== action.payload),
+          },
+        },
+      }
+    }
+
     default:
       return state
   }
@@ -281,6 +411,18 @@ export function DocumentProvider({ children }) {
     updateRecipients: useCallback((p) => dispatch({ type: 'UPDATE_RECIPIENTS', payload: p }), []),
     updateOptions: useCallback((p) => dispatch({ type: 'UPDATE_OPTIONS', payload: p }), []),
     reorderBlocks: useCallback((blocks) => dispatch({ type: 'REORDER_BLOCKS', payload: blocks }), []),
+
+    // 會長令
+    updateOrder: useCallback((p) => dispatch({ type: 'UPDATE_ORDER', payload: p }), []),
+    addAppendixEntry: useCallback(() => dispatch({ type: 'ADD_APPENDIX_ENTRY' }), []),
+    updateAppendixEntry: useCallback((entryId, updates) =>
+      dispatch({ type: 'UPDATE_APPENDIX_ENTRY', payload: { entryId, updates } }), []),
+    deleteAppendixEntry: useCallback((entryId) =>
+      dispatch({ type: 'DELETE_APPENDIX_ENTRY', payload: entryId }), []),
+    reorderAppendixEntries: useCallback((entries) =>
+      dispatch({ type: 'REORDER_APPENDIX_ENTRIES', payload: entries }), []),
+    addOrderImage: useCallback((img) => dispatch({ type: 'ADD_ORDER_IMAGE', payload: img }), []),
+    deleteOrderImage: useCallback((id) => dispatch({ type: 'DELETE_ORDER_IMAGE', payload: id }), []),
   }
 
   return (

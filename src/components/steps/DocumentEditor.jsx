@@ -5,6 +5,10 @@ import BlockEditor from '../editor/BlockEditor'
 import SignaturePanel from '../editor/SignaturePanel'
 import RecipientsPanel from '../editor/RecipientsPanel'
 import DocumentPreview from '../preview/DocumentPreview'
+import OrderPreview from '../preview/OrderPreview'
+import OrderMetaPanel from '../editor/OrderMetaPanel'
+import OrderBodyPanel from '../editor/OrderBodyPanel'
+import OrderAppendixPanel from '../editor/OrderAppendixPanel'
 import ExportDialog from '../export/ExportDialog'
 
 function SectionAccordion({ title, icon, defaultOpen = false, children }) {
@@ -35,6 +39,125 @@ function SectionAccordion({ title, icon, defaultOpen = false, children }) {
   )
 }
 
+// ── 圖示 SVG helpers ─────────────────────────────────────────────────────────
+const InfoIcon = (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+    <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M7 5V7M7 9H7.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+  </svg>
+)
+const EditIcon = (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+    <path d="M2 10L5.5 9L11 3.5a1.5 1.5 0 00-2-2L3 7l-1 3z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+)
+const AttachIcon = (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+    <path d="M12 7.5L6.5 13a4.5 4.5 0 01-6.364-6.364L6.5 0 6.5 1M7 6l-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+)
+const OptionsIcon = (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+    <path d="M7 2v1M7 11v1M2 7H1M13 7h-1M3.757 3.757l-.707-.707M10.95 10.95l-.707-.707M10.95 3.757l.707-.707M3.05 10.95l.707-.707" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <circle cx="7" cy="7" r="2.5" stroke="currentColor" strokeWidth="1.5"/>
+  </svg>
+)
+
+// ── 一般文件編輯面板（原有邏輯）──────────────────────────────────────────────
+function StandardEditorPanels() {
+  const { state, actions } = useDocument()
+  const template = useTemplate()
+  const { blocks, options } = state.document
+
+  return (
+    <>
+      <SectionAccordion title="基本資訊" defaultOpen icon={InfoIcon}>
+        <MetaPanel />
+      </SectionAccordion>
+
+      {template?.hasRecipients && (
+        <SectionAccordion
+          title="受文者"
+          defaultOpen
+          icon={
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M1 11.5C1 9.567 3.686 8 7 8s6 1.567 6 3.5M7 6a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+          }
+        >
+          <RecipientsPanel />
+        </SectionAccordion>
+      )}
+
+      <div className="space-y-3">
+        <p className="text-[11px] font-sans font-medium text-ink-muted uppercase tracking-wider px-1">
+          內文區塊
+        </p>
+        {blocks.map((block) => (
+          <BlockEditor key={block.id} block={block} />
+        ))}
+      </div>
+
+      <SectionAccordion title="署名設定" defaultOpen icon={EditIcon}>
+        <SignaturePanel />
+      </SectionAccordion>
+
+      <SectionAccordion title="文件選項" icon={OptionsIcon}>
+        <div className="space-y-3 my-4">
+          <label className="flex items-center justify-between cursor-pointer">
+            <span className="text-sm font-sans text-ink">加上騎縫章</span>
+            <button
+              onClick={() => actions.updateOptions({ addStamp: !options.addStamp })}
+              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+                options.addStamp ? 'bg-vermillion' : 'bg-border'
+              }`}
+            >
+              <span className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform ${
+                options.addStamp ? 'translate-x-4.5' : 'translate-x-0.5'
+              }`} />
+            </button>
+          </label>
+        </div>
+        <div className="space-y-3">
+          <label className="flex items-center justify-between cursor-pointer">
+            <span className="text-sm font-sans text-ink">顯示「未蓋印信無效」字樣</span>
+            <button
+              onClick={() => actions.updateOptions({ addSealArea: !options.addSealArea })}
+              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+                options.addSealArea ? 'bg-vermillion' : 'bg-border'
+              }`}
+            >
+              <span className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform ${
+                options.addSealArea ? 'translate-x-4.5' : 'translate-x-0.5'
+              }`} />
+            </button>
+          </label>
+        </div>
+      </SectionAccordion>
+    </>
+  )
+}
+
+// ── 會長令編輯面板 ────────────────────────────────────────────────────────────
+function OrderEditorPanels() {
+  return (
+    <>
+      <SectionAccordion title="基本資訊（日期、屆次、令字號）" defaultOpen icon={InfoIcon}>
+        <OrderMetaPanel />
+      </SectionAccordion>
+
+      <SectionAccordion title="公告段落與署名" defaultOpen icon={EditIcon}>
+        <OrderBodyPanel />
+      </SectionAccordion>
+
+      <SectionAccordion title="法規附件（選填）" icon={AttachIcon}>
+        <OrderAppendixPanel />
+      </SectionAccordion>
+    </>
+  )
+}
+
+// ── 主元件 ───────────────────────────────────────────────────────────────────
 export default function DocumentEditor() {
   const { state, actions } = useDocument()
   const org = useOrg()
@@ -43,7 +166,8 @@ export default function DocumentEditor() {
   const [showExport, setShowExport] = useState(false)
   const [previewScale, setPreviewScale] = useState(1)
 
-  const { blocks, options } = state.document
+  const { options } = state.document
+  const isOrder = template?.docType === 'order'
 
   return (
     <div className="flex h-[calc(100vh-56px)]">
@@ -84,101 +208,7 @@ export default function DocumentEditor() {
 
         {/* Scrollable editor content */}
         <div className="flex-1 overflow-y-auto scrollbar-thin p-4 space-y-3">
-          {/* Meta info */}
-          <SectionAccordion
-            title="基本資訊"
-            defaultOpen
-            icon={
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.5"/>
-                <path d="M7 5V7M7 9H7.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
-            }
-          >
-            <MetaPanel />
-          </SectionAccordion>
-
-          {/* Recipients (for 函文 only) */}
-          {template?.hasRecipients && (
-            <SectionAccordion
-              title="受文者"
-              defaultOpen
-              icon={
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                  <path d="M1 11.5C1 9.567 3.686 8 7 8s6 1.567 6 3.5M7 6a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
-              }
-            >
-              <RecipientsPanel />
-            </SectionAccordion>
-          )}
-
-          {/* Content blocks */}
-          <div className="space-y-3">
-            <p className="text-[11px] font-sans font-medium text-ink-muted uppercase tracking-wider px-1">
-              內文區塊
-            </p>
-            {blocks.map((block) => (
-              <BlockEditor key={block.id} block={block} />
-            ))}
-          </div>
-
-          {/* Signature */}
-          <SectionAccordion
-            title="署名設定"
-            defaultOpen
-            icon={
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path d="M2 10L5.5 9L11 3.5a1.5 1.5 0 00-2-2L3 7l-1 3z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            }
-          >
-            <SignaturePanel />
-          </SectionAccordion>
-
-          {/* Options */}
-          <SectionAccordion
-            title="文件選項"
-            icon={
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path d="M7 2v1M7 11v1M2 7H1M13 7h-1M3.757 3.757l-.707-.707M10.95 10.95l-.707-.707M10.95 3.757l.707-.707M3.05 10.95l.707-.707" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                <circle cx="7" cy="7" r="2.5" stroke="currentColor" strokeWidth="1.5"/>
-              </svg>
-            }
-          >
-            <div className="space-y-3 my-4">
-              <label className="flex items-center justify-between cursor-pointer">
-                <span className="text-sm font-sans text-ink">加上騎縫章</span>
-                <button
-                  onClick={() => actions.updateOptions({ addStamp: !options.addStamp })}
-                  className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                    options.addStamp ? 'bg-vermillion' : 'bg-border'
-                  }`}
-                >
-                  <span className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform ${
-                    options.addStamp ? 'translate-x-4.5' : 'translate-x-0.5'
-                  }`} />
-                </button>
-              </label>
-            </div>
-            <div className="space-y-3">
-              <label className="flex items-center justify-between cursor-pointer">
-                <span className="text-sm font-sans text-ink">顯示「未蓋印信無效」字樣</span>
-                <button
-                  onClick={() => actions.updateOptions({ addSealArea: !options.addSealArea })}
-                  className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                    options.addSealArea ? 'bg-vermillion' : 'bg-border'
-                  }`}
-                >
-                  <span className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform ${
-                    options.addSealArea ? 'translate-x-4.5' : 'translate-x-0.5'
-                  }`} />
-                </button>
-              </label>
-            </div>
-          </SectionAccordion>
-
-          {/* Spacer */}
+          {isOrder ? <OrderEditorPanels /> : <StandardEditorPanels />}
           <div className="h-4" />
         </div>
       </div>
@@ -219,11 +249,16 @@ export default function DocumentEditor() {
               flexShrink: 0,
             }}
           >
-            <DocumentPreview
-              ref={previewRef}
-              showStamp={options.addStamp}
-              showSealArea={options.addSealArea}
-            />
+            {isOrder
+              ? <OrderPreview ref={previewRef} />
+              : (
+                <DocumentPreview
+                  ref={previewRef}
+                  showStamp={options.addStamp}
+                  showSealArea={options.addSealArea}
+                />
+              )
+            }
           </div>
         </div>
       </div>
