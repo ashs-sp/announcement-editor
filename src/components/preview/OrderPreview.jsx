@@ -122,6 +122,7 @@ const OrderPreview = forwardRef(function OrderPreview(_, ref) {
   } = order
 
   const internalRef = useRef(null)
+  const lastLayoutRef = useRef('')
   const [pages, setPages] = useState(1)
 
   useImperativeHandle(ref, () => internalRef.current)
@@ -130,11 +131,127 @@ const OrderPreview = forwardRef(function OrderPreview(_, ref) {
   useEffect(() => {
     if (!internalRef.current) return
     const observer = new ResizeObserver(() => {
-      if (!internalRef.current) return
-      const mmToPx = 96 / 25.4
-      const pageHeightPx = 297 * mmToPx
-      const h = internalRef.current.getBoundingClientRect().height
-      setPages(Math.max(1, Math.ceil(h / pageHeightPx)))
+      if (internalRef.current) {
+        const originalMinHeight = internalRef.current.style.minHeight
+        internalRef.current.style.minHeight = '0px'
+
+        // 1. Temporarily remove all adjustments to measure natural flow
+        const existingAvoids = internalRef.current.querySelectorAll('.avoid-zone')
+        const hadAvoids = existingAvoids.length > 0
+        existingAvoids.forEach(el => el.style.display = 'none')
+
+        const blocks = internalRef.current.querySelectorAll('.content-block')
+        const originalMargins = []
+        let hadMargins = false
+        blocks.forEach(b => {
+          originalMargins.push(b.style.marginTop)
+          if (b.style.marginTop && b.style.marginTop !== '0px') {
+            hadMargins = true
+          }
+          b.style.marginTop = '0px'
+        })
+
+        // Force reflow
+        void internalRef.current.offsetHeight
+
+        const mmToPx = 96 / 25.4
+        const pageHeightPx = 297 * mmToPx
+        const footerHeightPx = 25 * mmToPx
+        const topMarginPx = 18 * mmToPx
+
+        let newLayoutSignature = ''
+        const layoutActions = []
+
+        blocks.forEach((block, index) => {
+          const rect = block.getBoundingClientRect()
+          const parentRect = internalRef.current.getBoundingClientRect()
+          const offsetTop = rect.top - parentRect.top
+
+          const pageIndex = Math.floor(offsetTop / pageHeightPx)
+          const pageBottom = (pageIndex + 1) * pageHeightPx
+
+          if (offsetTop + rect.height > pageBottom - footerHeightPx) {
+            if (rect.height < 120) {
+              const pushAmount = pageBottom - offsetTop + topMarginPx
+              layoutActions.push(() => block.style.marginTop = `${pushAmount}px`)
+              newLayoutSignature += `M${index}:${pushAmount}|`
+            } else {
+              let currentBottom = pageBottom
+              let currentHeight = rect.height
+              const avoidZones = []
+              
+              while (offsetTop + currentHeight > currentBottom - footerHeightPx) {
+                const avoidStart = currentBottom - footerHeightPx - offsetTop
+                const avoidHeight = footerHeightPx + topMarginPx
+                avoidZones.push({ start: avoidStart, height: avoidHeight })
+                currentHeight += avoidHeight
+                currentBottom += pageHeightPx
+              }
+
+              if (avoidZones.length > 0) {
+                let polygonPoints = []
+                let maxEnd = 0
+                avoidZones.forEach(zone => {
+                  const end = zone.start + zone.height
+                  polygonPoints.push(`0 ${zone.start}px, 100% ${zone.start}px, 100% ${end}px, 0 ${end}px`)
+                  if (end > maxEnd) maxEnd = end
+                })
+                
+                const polygonStr = `polygon(${polygonPoints.join(', ')})`
+                newLayoutSignature += `A${index}:${maxEnd}:${polygonStr}|`
+                
+                layoutActions.push(() => {
+                  let textContainer = block.querySelector('.flex-1') || block
+                  
+                  // Check if we already have an avoid-zone here
+                  let avoidEl = textContainer.querySelector('.avoid-zone')
+                  if (!avoidEl) {
+                    avoidEl = document.createElement('div')
+                    avoidEl.className = 'avoid-zone'
+                    avoidEl.style.float = 'left'
+                    avoidEl.style.width = '100%'
+                    avoidEl.style.margin = '0'
+                    avoidEl.style.padding = '0'
+                    textContainer.insertBefore(avoidEl, textContainer.firstChild)
+                  }
+                  avoidEl.style.display = 'block'
+                  avoidEl.style.height = `${maxEnd}px`
+                  avoidEl.style.shapeOutside = polygonStr
+                })
+              }
+            }
+          }
+        })
+
+        const heightPx = internalRef.current.getBoundingClientRect().height
+        const calculatedPages = Math.max(1, Math.ceil(heightPx / pageHeightPx))
+        newLayoutSignature += `P${calculatedPages}`
+
+        const needsAvoids = newLayoutSignature.includes('A')
+        const needsMargins = newLayoutSignature.includes('M')
+        
+        // Detect if React re-rendered and wiped out our manual DOM adjustments
+        let domWiped = false
+        if (needsAvoids && !hadAvoids) domWiped = true
+        if (needsMargins && !hadMargins) domWiped = true
+
+        // 2. Only apply if something changed OR if React wiped out our nodes
+        if (newLayoutSignature !== lastLayoutRef.current || domWiped) {
+          lastLayoutRef.current = newLayoutSignature
+          // Actually apply the actions
+          existingAvoids.forEach(el => el.remove()) // clean up to start fresh
+          blocks.forEach(b => b.style.marginTop = '0px')
+          layoutActions.forEach(action => action())
+          
+          setPages(calculatedPages)
+        } else {
+          // Revert our temporary removals since nothing changed
+          existingAvoids.forEach(el => el.style.display = 'block')
+          blocks.forEach((b, i) => b.style.marginTop = originalMargins[i])
+        }
+
+        internalRef.current.style.minHeight = originalMinHeight
+      }
     })
     observer.observe(internalRef.current)
     return () => observer.disconnect()
