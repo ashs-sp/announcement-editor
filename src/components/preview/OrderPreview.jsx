@@ -55,12 +55,15 @@ function renderLineText(text) {
 }
 
 function classifyLine(line) {
-  // 括號開頭（全形或半形）→ no indent
-  if (/^[（(]/.test(line)) return { indent: 0, firstLine: 0 }
-  // 括號包裹阿拉伯數字（如 (1) 或 （１））→ 整體縮排 6字元、首行凸排 2字元
-  if (/^[（(][0-9０-９]/.test(line)) return { indent: 6 * EM, firstLine: -2 * EM }
-  // 阿拉伯數字開頭，後接空白（全半形或 tab）→ 整體縮排 4字元、首行凸排 2字元
-  if (/^[0-9０-９]+[\s\t　]/.test(line)) return { indent: 4 * EM, firstLine: -2 * EM }
+  // 「第x條」開頭者：不縮排
+  if (/^第\s*[一二三四五六七八九十百千0-9０-９]+\s*條/.test(line)) return { indent: 0, firstLine: 0 }
+  
+  // 括號包裹數字或中文數字（如 (1), （一））→ 整體縮排 6字元、首行凸排 2字元
+  if (/^[（(][一二三四五六七八九十百千0-9０-９]+[）)]/.test(line)) return { indent: 6 * EM, firstLine: -2 * EM }
+  
+  // 中文數字後接頓號（如 一、）或者阿拉伯數字後接空白（全半形或 tab）→ 整體縮排 4字元、首行凸排 2字元
+  if (/^[一二三四五六七八九十百千]+、/.test(line) || /^[0-9０-９]+[\s\t　]/.test(line)) return { indent: 4 * EM, firstLine: -2 * EM }
+  
   // 其餘：首行縮排 2字元
   return { indent: 0, firstLine: 2 * EM }
 }
