@@ -291,28 +291,26 @@ const OrderPreview = forwardRef(function OrderPreview(_, ref) {
       <div
         className="content-block"
         style={{
-          border: '3px solid #1C2B3A',
-          borderLeft: 'none',
-          borderRight: 'none',
-          padding: '2px 0',
+          borderTop: '3px solid #1C2B3A',
+          borderBottom: '3px solid #1C2B3A',
+          padding: '3px 0',
           marginBottom: '2rem',
         }}
       >
         <div 
           style={{
             display: 'block',
-            border: '1px solid #1C2B3A', 
-            borderLeft: 'none',
-            borderRight: 'none',
-            padding: '12px 12px 16px 12px'
+            borderTop: '1px solid #1C2B3A', 
+            borderBottom: '1px solid #1C2B3A', 
+            padding: '16px 12px 24px 12px'
           }}>
           {/* 第一行：機關全名 */}
           <div style={{
             fontSize: '16pt',
             fontWeight: 'bold',
             textAlign: 'center',
-            lineHeight: '1.2',
-            paddingBottom: '8px'
+            lineHeight: '1',
+            marginBottom: '16px'
           }}>
             {orgFullName}
           </div>
@@ -321,7 +319,8 @@ const OrderPreview = forwardRef(function OrderPreview(_, ref) {
             fontSize: '32pt',
             fontWeight: 'bold',
             textAlign: 'center',
-            lineHeight: '1.2',
+            lineHeight: '1',
+            paddingBottom: '4px'
           }}>
             會長令
           </div>
