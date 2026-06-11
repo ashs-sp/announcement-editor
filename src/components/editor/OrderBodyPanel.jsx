@@ -149,7 +149,7 @@ export default function OrderBodyPanel() {
             type="text"
             value={signatureTitle}
             onChange={e => actions.updateOrder({ signatureTitle: e.target.value })}
-            placeholder="如：學生會會長"
+            placeholder="如：會　長"
             className={inputCls}
           />
         </div>

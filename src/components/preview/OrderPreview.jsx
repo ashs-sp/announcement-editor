@@ -75,14 +75,14 @@ function AppendixContent({ content }) {
     <div>
       {lines.map((line, idx) => {
         const { indent, firstLine } = classifyLine(line)
-        const paddingLeft = indent + (firstLine >= 0 ? firstLine : 0)
-        const textIndent = firstLine < 0 ? firstLine : 0
+        const paddingLeft = indent/*  + (firstLine >= 0 ? firstLine : 0) */
+        const textIndent = firstLine /* < 0 ? firstLine : 0 */
         return (
           <div
             key={idx}
             style={{
-              paddingLeft: `${paddingLeft}px`,
-              textIndent: `${textIndent}px`,
+              paddingLeft: `${paddingLeft}pt`,
+              textIndent: `${textIndent}pt`,
               textAlign: 'justify',
               wordBreak: 'break-all',
               minHeight: '1.9em',

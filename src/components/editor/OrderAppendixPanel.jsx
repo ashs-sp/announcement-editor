@@ -11,7 +11,7 @@ const inputCls = `
 const labelCls = 'block text-xs font-sans font-medium text-ink-muted uppercase tracking-wide mb-1.5'
 
 const INDENT_HELP = `縮排規則：
-• 括號開頭（全/半形）→ 不縮排
+• 條號、括號開頭（全/半形）→ 不縮排
 • 數字+空格開頭 → 整體縮排 4字元、首行凸排 2字元
 • (數字) 開頭 → 整體縮排 6字元、首行凸排 2字元
 • 其餘 → 首行縮排 2字元
@@ -89,8 +89,8 @@ export default function OrderAppendixPanel() {
                   <label className={labelCls}>類型</label>
                   <div className="flex gap-3">
                     {[
-                      { value: 'title', label: '法規標題（《》）' },
-                      { value: 'articles', label: '條文參照' },
+                      { value: 'title', label: '法規標題' },
+                      // { value: 'articles', label: '條文參照' },
                     ].map(opt => (
                       <label key={opt.value} className="flex items-center gap-1.5 cursor-pointer">
                         <input
