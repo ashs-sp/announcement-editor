@@ -21,10 +21,26 @@ export default function ExportDialog({ onClose }) {
   const hasMultipleRecipients = template?.hasRecipients && recipients.length > 1
 
   const getFilename = (suffix = '') => {
-    const dateStr = meta?.date ? isoToROCShort(meta?.date).replace(/\//g, '') : 'unknown'
     const orgName = org?.shortName || 'doc'
     const tplName = template?.name || 'file'
-    return `${orgName}_${tplName}${suffix}_${dateStr}`
+    
+    let identifier = 'unknown'
+    
+    if (template?.docType === 'order') {
+      if (doc.order?.orderNumber) {
+        identifier = `令字第${doc.order.orderNumber}號`
+      } else if (meta?.date) {
+        identifier = isoToROCShort(meta.date).replace(/\//g, '')
+      }
+    } else {
+      if (meta?.docNumber?.enabled && (meta?.docNumber?.prefix || meta?.docNumber?.number)) {
+        identifier = `${meta.docNumber.prefix}${meta.docNumber.number}`
+      } else if (meta?.date) {
+        identifier = isoToROCShort(meta.date).replace(/\//g, '')
+      }
+    }
+
+    return `${orgName}_${tplName}${suffix}_${identifier}`
   }
 
   const handleExportPDF = async () => {
