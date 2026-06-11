@@ -27,7 +27,7 @@
       "高附生會字", 
       "高附生會副字"
     ],
-    "templateIds": ["announcement", "letter", "notice", "resolution"],
+    "templateIds": ["order", "announcement", "letter", "notice", "resolution"],
     "leaders": [
       { "title": "會　長", "honorific": "" },
       { "title": "副會長", "honorific": "代行" },
