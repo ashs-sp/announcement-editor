@@ -7,11 +7,13 @@ import {
 import { saveAs } from 'file-saver'
 import { computeNumberedList } from './numbering'
 import { isoToROC } from './dateUtils'
+import { buildOrderBody } from '../components/preview/OrderPreview'
 
-/**
- * Generate a Word document from the document state
- */
 export async function exportAsDocx(docState, orgData, templateData, filename = 'document') {
+  if (templateData.docType === 'order') {
+    return exportOrderAsDocx(docState, orgData, templateData, filename)
+  }
+
   const { meta, blocks, signature, options } = docState
 
   const children = []
@@ -185,6 +187,195 @@ export async function exportAsDocx(docState, orgData, templateData, filename = '
     })
   )
 
+  const doc = new Document({
+    sections: [
+      {
+        properties: {
+          page: {
+            margin: {
+              top: convertInchesToTwip(1.0),
+              right: convertInchesToTwip(1.0),
+              bottom: convertInchesToTwip(1.0),
+              left: convertInchesToTwip(1.2),
+            },
+          },
+        },
+        footers: {
+          default: new Footer({
+            children: [
+              new Paragraph({
+                alignment: AlignmentType.CENTER,
+                children: [
+                  new TextRun({ text: "第 ", size: 20, font: '標楷體' }),
+                  new TextRun({ children: [PageNumber.CURRENT], size: 20, font: '標楷體' }),
+                  new TextRun({ text: " 頁，共 ", size: 20, font: '標楷體' }),
+                  new TextRun({ children: [PageNumber.TOTAL_PAGES], size: 20, font: '標楷體' }),
+                  new TextRun({ text: " 頁", size: 20, font: '標楷體' }),
+                ],
+              }),
+            ],
+          }),
+        },
+        children,
+      },
+    ],
+  })
+
+  const blob = await Packer.toBlob(doc)
+  saveAs(blob, `${filename}.docx`)
+}
+
+async function exportOrderAsDocx(docState, orgData, templateData, filename) {
+  const { meta, order } = docState
+  const {
+    sessionNumber, orderNumber, doDelete, doEnact, doAmend,
+    signatureTitle, signatureName,
+    appendixEnabled, appendixEntries
+  } = order
+
+  const children = []
+
+  const orgFullName = orgData.name || '（機關名稱）'
+  const rocDate = meta.date ? isoToROC(meta.date) : '（日期）'
+  const sessionStr = sessionNumber || '○○'
+  const orderNumStr = orderNumber || 'XXXXXXX'
+  const bodyText = (doDelete || doEnact || doAmend) ? buildOrderBody(order) : '茲（請選擇動作）《（法規名稱）》，公布之。'
+
+  // 1. 機關全名 + 會長令
+  children.push(
+    new Paragraph({
+      children: [
+        new TextRun({ text: orgFullName, size: 28, bold: true, font: "標楷體" })
+      ],
+      alignment: AlignmentType.CENTER,
+      border: { top: { style: BorderStyle.SINGLE, size: 6, space: 1 } },
+      spacing: { before: 100, after: 100 }
+    })
+  )
+  children.push(
+    new Paragraph({
+      children: [
+        new TextRun({ text: "會長令", size: 48, bold: true, font: "標楷體" })
+      ],
+      alignment: AlignmentType.CENTER,
+      border: { bottom: { style: BorderStyle.SINGLE, size: 6, space: 1 } },
+      spacing: { before: 100, after: 300 }
+    })
+  )
+
+  // 2. 標題: 會長令 + 日期/令字號
+  children.push(
+    new Table({
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE }, insideHorizontal: { style: BorderStyle.NONE }, insideVertical: { style: BorderStyle.NONE } },
+      rows: [
+        new TableRow({
+          children: [
+            new TableCell({
+              children: [
+                new Paragraph({
+                  children: [new TextRun({ text: "會長令", size: 40, bold: true, font: "標楷體" })]
+                })
+              ],
+              width: { size: 50, type: WidthType.PERCENTAGE },
+              borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
+            }),
+            new TableCell({
+              children: [
+                new Paragraph({
+                  children: [new TextRun({ text: `中華民國 ${rocDate}`, size: 22, font: "標楷體" })],
+                  alignment: AlignmentType.RIGHT,
+                }),
+                new Paragraph({
+                  children: [new TextRun({ text: `（${sessionStr}）令字第 ${orderNumStr} 號`, size: 22, font: "標楷體" })],
+                  alignment: AlignmentType.RIGHT,
+                })
+              ],
+              width: { size: 50, type: WidthType.PERCENTAGE },
+              borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
+            })
+          ]
+        })
+      ]
+    })
+  )
+
+  children.push(new Paragraph({ spacing: { after: 300 } }))
+
+  // 3. Body
+  children.push(
+    new Paragraph({
+      children: [new TextRun({ text: bodyText, size: 28, font: "TW-Kai-98_1" })],
+      alignment: AlignmentType.JUSTIFIED,
+      spacing: { after: 300 },
+    })
+  )
+
+  // 4. Signature
+  children.push(
+    new Paragraph({
+      children: [
+        new TextRun({ text: signatureTitle || '', size: 28, font: "標楷體" }),
+        new TextRun({ text: signatureName ? `  ${signatureName}` : '', size: 28, font: "標楷體" })
+      ],
+      alignment: AlignmentType.LEFT,
+      spacing: { after: 300 },
+    })
+  )
+
+  // 5. Appendix
+  if (appendixEnabled && appendixEntries && appendixEntries.length > 0) {
+    for (const entry of appendixEntries) {
+      if (entry.scopeType === 'title') {
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: entry.title ? `《${entry.title}》` : '《法規標題》', size: 28, font: "標楷體" }),
+              new TextRun({ text: entry.articlesRef ? ` ${entry.articlesRef}` : '', size: 28, font: "標楷體" })
+            ],
+            alignment: AlignmentType.LEFT,
+            spacing: { before: 200, after: 100 }
+          })
+        )
+      } else {
+        children.push(
+          new Paragraph({
+            children: [new TextRun({ text: entry.articlesRef || '（條文參照）', size: 28, font: "標楷體" })],
+            alignment: AlignmentType.LEFT,
+            spacing: { before: 200, after: 100 }
+          })
+        )
+      }
+
+      if (entry.content) {
+        const lines = entry.content.split('\n')
+        for (const line of lines) {
+          let indentConfig = {}
+          
+          if (/^第\s*[一二三四五六七八九十百千0-9０-９]+\s*條/.test(line)) {
+            indentConfig = { left: 0 }
+          } else if (/^[（(][一二三四五六七八九十百千0-9０-９]+[）)]/.test(line)) {
+            indentConfig = { left: convertInchesToTwip(1.2), hanging: convertInchesToTwip(0.4) }
+          } else if (/^[一二三四五六七八九十百千]+、/.test(line) || /^[0-9０-９]+[\s\t　]/.test(line)) {
+            indentConfig = { left: convertInchesToTwip(0.8), hanging: convertInchesToTwip(0.4) }
+          } else {
+            indentConfig = { firstLine: convertInchesToTwip(0.4) }
+          }
+
+          children.push(
+            new Paragraph({
+              children: [new TextRun({ text: line, size: 28, font: "TW-Kai-98_1" })],
+              indent: indentConfig,
+              alignment: AlignmentType.JUSTIFIED,
+              spacing: { after: 100 } // roughly matching minHeight 1.9em
+            })
+          )
+        }
+      }
+    }
+  }
+
+  // Generate doc
   const doc = new Document({
     sections: [
       {

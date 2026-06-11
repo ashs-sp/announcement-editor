@@ -5,6 +5,7 @@ import { exportElementAsImage } from '../../utils/exportImage'
 import { exportAsDocx } from '../../utils/exportDocx'
 import { isoToROCShort } from '../../utils/dateUtils'
 import DocumentPreview from '../preview/DocumentPreview'
+import OrderPreview from '../preview/OrderPreview'
 
 export default function ExportDialog({ onClose }) {
   const { state } = useDocument()
@@ -179,13 +180,17 @@ export default function ExportDialog({ onClose }) {
         </div>
       </div>
 
-      {/* Hidden preview for PDF export */}
+      {/* Hidden preview for export */}
       <div style={{ position: 'absolute', left: '-9999px', top: 0 }}>
-        <DocumentPreview
-          ref={previewRef}
-          showStamp={state.document.options?.addStamp}
-          showSealArea={state.document.options?.addSealArea}
-        />
+        {template?.docType === 'order' ? (
+          <OrderPreview ref={previewRef} />
+        ) : (
+          <DocumentPreview
+            ref={previewRef}
+            showStamp={state.document.options?.addStamp}
+            showSealArea={state.document.options?.addSealArea}
+          />
+        )}
       </div>
     </div>
   )
