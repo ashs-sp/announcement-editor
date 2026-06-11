@@ -56,16 +56,24 @@ function renderLineText(text) {
 
 function classifyLine(line) {
   // 「第x條」開頭者：不縮排
-  if (/^第\s*[一二三四五六七八九十百千0-9０-９]+\s*條/.test(line)) return { indent: 0, firstLine: 0 }
+  if (/^第\s*[一二三四五六七八九十百千0-9０-９]+\s*條/.test(line)) {
+    return { indent: 0, firstLine: 0, prefix: '', content: line }
+  }
   
   // 括號包裹數字或中文數字（如 (1), （一））→ 整體縮排 6字元、首行凸排 2字元
-  if (/^[（(][一二三四五六七八九十百千0-9０-９]+[）)]/.test(line)) return { indent: 6 * EM, firstLine: -2 * EM }
+  let match = line.match(/^([（(][一二三四五六七八九十百千0-9０-９]+[）)])\s*/);
+  if (match) {
+    return { indent: 6 * EM, firstLine: -2 * EM, prefix: match[1], content: line.slice(match[0].length) }
+  }
   
   // 中文數字後接頓號（如 一、）或者阿拉伯數字後接空白（全半形或 tab）→ 整體縮排 4字元、首行凸排 2字元
-  if (/^[一二三四五六七八九十百千]+、/.test(line) || /^[0-9０-９]+[\s\t　]/.test(line)) return { indent: 4 * EM, firstLine: -2 * EM }
+  match = line.match(/^([一二三四五六七八九十百千]+、|[0-9０-９]+)[\s\t　]*/);
+  if (match) {
+    return { indent: 4 * EM, firstLine: -2 * EM, prefix: match[1], content: line.slice(match[0].length) }
+  }
   
   // 其餘：首行縮排 2字元
-  return { indent: 0, firstLine: 2 * EM }
+  return { indent: 0, firstLine: 2 * EM, prefix: '', content: line }
 }
 
 function AppendixContent({ content }) {
@@ -74,9 +82,9 @@ function AppendixContent({ content }) {
   return (
     <div>
       {lines.map((line, idx) => {
-        const { indent, firstLine } = classifyLine(line)
-        const paddingLeft = indent/*  + (firstLine >= 0 ? firstLine : 0) */
-        const textIndent = firstLine /* < 0 ? firstLine : 0 */
+        const { indent, firstLine, prefix, content: mainContent } = classifyLine(line)
+        const paddingLeft = indent
+        const textIndent = firstLine
         return (
           <div
             key={idx}
@@ -88,7 +96,12 @@ function AppendixContent({ content }) {
               minHeight: '1.9em',
             }}
           >
-            {renderLineText(line)}
+            {prefix && (
+              <span style={{ display: 'inline-block', width: `${Math.abs(textIndent)}pt`, textIndent: 0 }}>
+                {prefix}
+              </span>
+            )}
+            {renderLineText(mainContent)}
           </div>
         )
       })}

@@ -351,20 +351,38 @@ async function exportOrderAsDocx(docState, orgData, templateData, filename) {
         const lines = entry.content.split('\n')
         for (const line of lines) {
           let indentConfig = {}
+          let prefix = ''
+          let mainContent = line
           
           if (/^第\s*[一二三四五六七八九十百千0-9０-９]+\s*條/.test(line)) {
             indentConfig = { left: 0 }
-          } else if (/^[（(][一二三四五六七八九十百千0-9０-９]+[）)]/.test(line)) {
-            indentConfig = { left: convertInchesToTwip(1.2), hanging: convertInchesToTwip(0.4) }
-          } else if (/^[一二三四五六七八九十百千]+、/.test(line) || /^[0-9０-９]+[\s\t　]/.test(line)) {
-            indentConfig = { left: convertInchesToTwip(0.8), hanging: convertInchesToTwip(0.4) }
           } else {
-            indentConfig = { firstLine: convertInchesToTwip(0.4) }
+            let match = line.match(/^([（(][一二三四五六七八九十百千0-9０-９]+[）)])\s*/)
+            if (match) {
+              indentConfig = { left: convertInchesToTwip(1.2), hanging: convertInchesToTwip(0.4) }
+              prefix = match[1]
+              mainContent = line.slice(match[0].length)
+            } else {
+              match = line.match(/^([一二三四五六七八九十百千]+、|[0-9０-９]+)[\s\t　]*/)
+              if (match) {
+                indentConfig = { left: convertInchesToTwip(0.8), hanging: convertInchesToTwip(0.4) }
+                prefix = match[1]
+                mainContent = line.slice(match[0].length)
+              } else {
+                indentConfig = { firstLine: convertInchesToTwip(0.4) }
+              }
+            }
           }
+
+          const runs = []
+          if (prefix) {
+            runs.push(new TextRun({ text: prefix + '\t', size: 28, font: "TW-Kai-98_1" }))
+          }
+          runs.push(new TextRun({ text: mainContent, size: 28, font: "TW-Kai-98_1" }))
 
           children.push(
             new Paragraph({
-              children: [new TextRun({ text: line, size: 28, font: "TW-Kai-98_1" })],
+              children: runs,
               indent: indentConfig,
               alignment: AlignmentType.JUSTIFIED,
               spacing: { after: 100 } // roughly matching minHeight 1.9em
