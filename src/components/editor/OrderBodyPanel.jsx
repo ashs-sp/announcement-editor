@@ -45,7 +45,7 @@ export default function OrderBodyPanel() {
           type="text"
           value={regulationName}
           onChange={e => actions.updateOrder({ regulationName: e.target.value })}
-          placeholder="如：國立高雄師範大學附屬高級中學學生會組織規程"
+          placeholder="如：國立高雄師範大學附屬高級中學學生會組織章程"
           className={inputCls}
         />
         <p className="text-[11px] text-ink-muted mt-1 font-sans">
@@ -69,7 +69,7 @@ export default function OrderBodyPanel() {
             </label>
             {doDelete && (
               <div>
-                <label className={`${labelCls} mt-2`}>刪除的條文</label>
+                <label className={`${labelCls} mt-2`}>刪除的條號</label>
                 <input
                   type="text"
                   value={deleteArticles}
@@ -78,7 +78,7 @@ export default function OrderBodyPanel() {
                   className={inputCls}
                 />
                 <p className="text-[11px] text-ink-muted mt-1 font-sans">
-                  輸入條號，系統自動補上「第 … 條條文」
+                  輸入條號，系統會自動補上「第 …… 條條文」
                 </p>
               </div>
             )}
@@ -95,7 +95,7 @@ export default function OrderBodyPanel() {
             </label>
             {doEnact && (
               <div>
-                <label className={`${labelCls} mt-2`}>制定的條文</label>
+                <label className={`${labelCls} mt-2`}>制定的條號</label>
                 <input
                   type="text"
                   value={enactArticles}
@@ -118,7 +118,7 @@ export default function OrderBodyPanel() {
             </label>
             {doAmend && (
               <div>
-                <label className={`${labelCls} mt-2`}>修正的條文</label>
+                <label className={`${labelCls} mt-2`}>修正的條號</label>
                 <input
                   type="text"
                   value={amendArticles}

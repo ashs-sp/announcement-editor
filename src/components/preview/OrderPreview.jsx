@@ -128,13 +128,13 @@ const OrderPreview = forwardRef(function OrderPreview(_, ref) {
 
   const orgFullName = org.name || '（機關名稱）'
   const rocDate = meta.date ? isoToROC(meta.date) : '（日期）'
-  const sessionStr = sessionNumber || '△'
+  const sessionStr = sessionNumber || '○○'
   const orderNumStr = orderNumber || 'XXXXXXX'
   const bodyText = buildOrderBody(order)
   const hasActions = doDelete || doEnact || doAmend
 
   // ── 右欄兩行：日期 + 令字號，兩行等寬對齊 ──────────────────────────────
-  const dateStr = `中華民國 ${rocDate}`
+  const dateStr = `${rocDate}`
   const numStr = `（${sessionStr}）令字第 ${orderNumStr} 號`
 
   return (
@@ -159,11 +159,20 @@ const OrderPreview = forwardRef(function OrderPreview(_, ref) {
         className="content-block"
         style={{
           border: '4px solid #1C2B3A',
+          borderLeft: 'none',
+          borderRight: 'none',
           padding: '2px',
           marginBottom: '1rem',
         }}
       >
-        <div style={{ border: '1px solid #1C2B3A', padding: '6px 12px' }}>
+        <div 
+          style={{
+            display: 'block',
+            border: '1px solid #1C2B3A', 
+            borderLeft: 'none',
+            borderRight: 'none',
+            padding: '6px 12px' 
+          }}>
           {/* 第一行：機關全名 */}
           <div style={{
             fontSize: '14pt',
@@ -217,14 +226,28 @@ const OrderPreview = forwardRef(function OrderPreview(_, ref) {
           flex: 1,
         }}>
           {/* 使用等寬容器讓兩行文字從相同起點開始 */}
-          <div style={{ display: 'table', borderCollapse: 'collapse' }}>
+          <div style={{ display: 'table', borderCollapse: 'collapse', width: 'max-content' }}>
             <div style={{ display: 'table-row' }}>
-              <div style={{ display: 'table-cell', whiteSpace: 'nowrap', lineHeight: '1.6' }}>
+              <div style={{ 
+                display: 'table-cell', 
+                whiteSpace: 'nowrap', 
+                lineHeight: '1.6',
+                width: '100%',
+                textAlign: 'justify',
+                textAlignLast: 'justify',
+              }}>
                 {dateStr}
               </div>
             </div>
             <div style={{ display: 'table-row' }}>
-              <div style={{ display: 'table-cell', whiteSpace: 'nowrap', lineHeight: '1.6' }}>
+              <div style={{ 
+                display: 'table-cell', 
+                whiteSpace: 'nowrap', 
+                lineHeight: '1.6',
+                width: '100%',
+                textAlign: 'justify',
+                textAlignLast: 'justify',
+              }}>
                 {numStr}
               </div>
             </div>

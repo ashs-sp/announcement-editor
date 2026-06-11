@@ -29,7 +29,7 @@ export default function OrderMetaPanel() {
                        transition-all"
           />
           <span className="text-xs text-ink-muted font-sans">
-            中華民國 {isoToROC(meta.date)}
+            {isoToROC(meta.date)}
           </span>
         </div>
       </div>
@@ -43,13 +43,13 @@ export default function OrderMetaPanel() {
             type="text"
             value={sessionNumber}
             onChange={e => actions.updateOrder({ sessionNumber: e.target.value })}
-            placeholder="如：十二"
+            placeholder="如：玖、拾、拾壹"
             className={inputCls}
           />
           <span className="text-sm font-sans text-ink-muted flex-shrink-0">）令字第</span>
         </div>
         <p className="text-[11px] text-ink-muted mt-1 font-sans">
-          預覽：（{sessionNumber || '△'}）令字第 {orderNumber || 'XXXXXXX'} 號
+          預覽：（{sessionNumber || '○○'}）令字第 {orderNumber || 'XXXXXXX'} 號
         </p>
       </div>
 
