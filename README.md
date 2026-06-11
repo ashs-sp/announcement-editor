@@ -5,13 +5,15 @@
 ## 功能特色
 
 - 🏛️ **多機關支援** — 學生會、學生議會、選委會、行政中心
-- 📋 **多範本支援** — 公告、函文、通知、決議
-- 📝 **層級編號** — 支援四層縮排（一、(一)、1.、(1)）
+- 📋 **多範本支援** — 公告、函文、通知、決議、**會長令（法規發布）**
+- 📝 **層級編號** — 支援四層縮排（一、(一)、1.、(1)），並針對法規附件有專屬排版規則
 - ✒️ **署名設定** — 僅職銜 / 職銜+姓名
 - 📎 **受文者管理** — 函文正副本處理
-- 📄 **多格式匯出** — PDF、Word、直接列印
-- 🔖 **騎縫章** — 多頁文件騎縫戳記
+- 📄 **多格式匯出** — PDF、Word、**PNG 圖片**、直接列印
+- 🔖 **騎縫章與印信** — 支援多頁文件騎縫戳記與「未蓋印信無效」字樣
 - 📅 **民國日期** — 自動換算民國曆
+- 🔤 **自訂發文字號** — 支援從清單選擇或自行輸入發文字號與字軌
+- 📑 **智慧跨頁排版** — 自動偵測長段落文字，於頁尾自然截斷並跨頁，避免產生巨大空白或文字與頁碼重疊
 
 ## 開發環境
 
@@ -27,11 +29,12 @@ npm run build
 ```
 
 將 `dist/` 目錄部署到 GitHub Pages，或透過 GitHub Actions 自動部署。
+本專案已設定適用於 GitHub Pages 的子路徑（`/announcement-editor/`）部署。
 
 ### GitHub Actions 自動部署
 
 1. 在 Repository Settings → Pages 中設定 Source 為 "GitHub Actions"
-2. 推送到 `main` 分支即可自動部署
+2. 推送到 `main` 分支即可自動觸發 Action 部署至 gh-pages 環境
 
 ## 資料維護
 
@@ -45,7 +48,7 @@ npm run build
   "abbr": "縮寫",
   "docNumberEnabled": true,
   "docNumberPrefixes": ["代字一", "代字二"],
-  "templateIds": ["announcement", "letter"],
+  "templateIds": ["announcement", "letter", "order"],
   "leaders": [
     { "title": "首長職銜", "honorific": "" }
   ]
@@ -83,8 +86,9 @@ npm run build
 
 - **框架**：React 18 + Vite 5
 - **樣式**：Tailwind CSS
-- **字型**：Noto Serif TC / Noto Sans TC
+- **字型**：Noto Serif TC / Noto Sans TC / TW-Kai-98_1 / MoeLI-3
 - **PDF 匯出**：html2canvas + jsPDF
+- **圖片匯出**：html2canvas
 - **Word 匯出**：docx
 - **部署**：GitHub Pages via GitHub Actions
 
@@ -93,12 +97,12 @@ npm run build
 ```
 src/
 ├── components/
-│   ├── editor/      # 各編輯面板元件
+│   ├── editor/      # 各編輯面板元件（包含會長令專屬面板）
 │   ├── export/      # 匯出對話框
-│   ├── preview/     # 文件預覽
+│   ├── preview/     # 文件預覽（一般公文與會長令專屬預覽）
 │   └── steps/       # 流程步驟頁面
-├── context/         # 全域狀態管理
-├── utils/           # 工具函式
+├── context/         # 全域狀態管理 (DocumentContext)
+├── utils/           # 工具函式 (匯出、編號、日期)
 └── index.css        # 全域樣式
 
 public/data/         # 機關與範本 JSON 資料
