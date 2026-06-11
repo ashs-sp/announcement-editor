@@ -302,7 +302,7 @@ const OrderPreview = forwardRef(function OrderPreview(_, ref) {
             display: 'block',
             borderTop: '1px solid #1C2B3A', 
             borderBottom: '1px solid #1C2B3A', 
-            padding: '20px 12px 32px 12px'
+            padding: '18px 12px 32px 12px'
           }}>
           {/* 第一行：機關全名 */}
           <div style={{
@@ -310,7 +310,7 @@ const OrderPreview = forwardRef(function OrderPreview(_, ref) {
             fontWeight: 'bold',
             textAlign: 'center',
             lineHeight: '1',
-            marginBottom: '24px'
+            // marginBottom: '6px'
           }}>
             {orgFullName}
           </div>
