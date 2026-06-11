@@ -15,7 +15,8 @@ export default function ExportDialog({ onClose }) {
   const [exporting, setExporting] = useState(false)
   const [exportFormat, setExportFormat] = useState('pdf')
 
-  const { meta, document: doc } = state
+  const { document: doc } = state
+  const { meta } = doc
   const recipients = doc?.recipients?.primary || []
   const hasMultipleRecipients = template?.hasRecipients && recipients.length > 1
 
